@@ -58,15 +58,15 @@ func (api *API) ListSharedStorages(args ...interface{}) ([]SharedStorage, error)
 }
 
 // POST /shared_storages
-func (api *API) CreateSharedStorage(request *SharedStorageRequest) (*SharedStorage, error) {
+func (api *API) CreateSharedStorage(request *SharedStorageRequest) (string, *SharedStorage, error) {
 	result := new(SharedStorage)
 	url := createUrl(api, sharedStoragePathSegment)
 	err := api.Client.Post(url, request, &result, http.StatusAccepted)
 	if err != nil {
-		return nil, err
+		return "", nil, err
 	}
 	result.api = api
-	return result, nil
+	return result.Id, result, nil
 }
 
 // GET /shared_storages/{id}

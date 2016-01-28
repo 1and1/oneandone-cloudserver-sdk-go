@@ -18,8 +18,8 @@ type FirewallPolicy struct {
 type FirewallPolicyRule struct {
 	idField
 	Protocol string `json:"protocol,omitempty"`
-	PortFrom uint16 `json:"port_from"`
-	PortTo   uint16 `json:"port_to"`
+	PortFrom *int   `json:"port_from,omitempty"`
+	PortTo   *int   `json:"port_to,omitempty"`
 	SourceIp string `json:"source,omitempty"`
 }
 
@@ -47,15 +47,15 @@ func (api *API) ListFirewallPolicies(args ...interface{}) ([]FirewallPolicy, err
 }
 
 // POST /firewall_policies
-func (api *API) CreateFirewallPolicy(fp_data *FirewallPolicyRequest) (*FirewallPolicy, error) {
+func (api *API) CreateFirewallPolicy(fp_data *FirewallPolicyRequest) (string, *FirewallPolicy, error) {
 	result := new(FirewallPolicy)
 	url := createUrl(api, firewallPolicyPathSegment)
 	err := api.Client.Post(url, &fp_data, &result, http.StatusAccepted)
 	if err != nil {
-		return nil, err
+		return "", nil, err
 	}
 	result.api = api
-	return result, nil
+	return result.Id, result, nil
 }
 
 // GET /firewall_policies/{id}

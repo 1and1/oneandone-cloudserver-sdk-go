@@ -4,6 +4,11 @@ import (
 	"fmt"
 )
 
+type errorResponse struct {
+	Type    string      `json:"type"`
+	Message string      `json:"message"`
+}
+
 type apiError struct {
 	httpStatusCode int
 	message        string

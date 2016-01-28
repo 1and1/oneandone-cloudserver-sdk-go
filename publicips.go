@@ -43,7 +43,7 @@ func (api *API) ListPublicIps(args ...interface{}) ([]PublicIp, error) {
 }
 
 // POST /public_ips
-func (api *API) CreatePublicIp(ip_type string, reverse_dns string) (*PublicIp, error) {
+func (api *API) CreatePublicIp(ip_type string, reverse_dns string) (string, *PublicIp, error) {
 	res := new(PublicIp)
 	url := createUrl(api, publicIpPathSegment)
 	req := struct {
@@ -52,10 +52,10 @@ func (api *API) CreatePublicIp(ip_type string, reverse_dns string) (*PublicIp, e
 	}{ReverseDns: reverse_dns, Type: ip_type}
 	err := api.Client.Post(url, &req, &res, http.StatusCreated)
 	if err != nil {
-		return nil, err
+		return "", nil, err
 	}
 	res.api = api
-	return res, nil
+	return res.Id, res, nil
 }
 
 // GET /public_ips/{id}

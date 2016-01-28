@@ -50,15 +50,15 @@ func (api *API) ListUsers(args ...interface{}) ([]User, error) {
 }
 
 // POST /users
-func (api *API) CreateUser(user *UserRequest) (*User, error) {
+func (api *API) CreateUser(user *UserRequest) (string, *User, error) {
 	result := new(User)
 	url := createUrl(api, userPathSegment)
 	err := api.Client.Post(url, &user, &result, http.StatusCreated)
 	if err != nil {
-		return nil, err
+		return "", nil, err
 	}
 	result.api = api
-	return result, nil
+	return result.Id, result, nil
 }
 
 // GET /users/{id}

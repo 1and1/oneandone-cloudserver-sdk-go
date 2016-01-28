@@ -107,9 +107,13 @@ func create_monitoring_policy() *MonitoringPolicy {
 		},
 	}
 	fmt.Printf("Creating new monitoring policy '%s'...\n", test_mp_name)
-	mp, err := api.CreateMonitoringPolicy(&mp_request)
+	mp_id, mp, err := api.CreateMonitoringPolicy(&mp_request)
 	if err != nil {
 		fmt.Printf("Unable to create a monitoring policy. Error: %s", err.Error())
+		return nil
+	}
+	if mp_id == "" || mp.Id == "" {
+		fmt.Printf("Unable to create monitoring policy '%s'.", test_mp_name)
 		return nil
 	}
 	api.WaitForState(mp, "ACTIVE", 10, 30)

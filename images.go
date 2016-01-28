@@ -49,15 +49,15 @@ func (api *API) ListImages(args ...interface{}) ([]Image, error) {
 }
 
 // POST /images
-func (api *API) CreateImage(request *ImageConfig) (*Image, error) {
+func (api *API) CreateImage(request *ImageConfig) (string, *Image, error) {
 	res := new(Image)
 	url := createUrl(api, imagePathSegment)
 	err := api.Client.Post(url, &request, &res, http.StatusAccepted)
 	if err != nil {
-		return nil, err
+		return "", nil, err
 	}
 	res.api = api
-	return res, nil
+	return res.Id, res, nil
 }
 
 // GET /images/{id}

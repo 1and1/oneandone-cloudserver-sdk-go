@@ -37,9 +37,13 @@ func create_user() *User {
 		Email:       tumail,
 	}
 	fmt.Printf("Creating new user '%s'...\n", tuname)
-	u, err := api.CreateUser(&req)
+	u_id, u, err := api.CreateUser(&req)
 	if err != nil {
 		fmt.Printf("Unable to create a user. Error: %s", err.Error())
+		return nil
+	}
+	if u_id == "" || u.Id == "" {
+		fmt.Printf("Unable to create user '%s'.", tuname)
 		return nil
 	}
 

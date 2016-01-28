@@ -24,7 +24,7 @@ This guide contains instructions on getting started with the library and how to 
   - [Usages](#usages)
   - [Server Appliances](#server-appliances)
   - [DVD ISO](#dvd-iso)
-- [Example](#example)
+- [Examples](#examples)
 - [Index](#index)
 
 
@@ -59,7 +59,7 @@ token := oneandone.SetToken("82ee732b8d47e451be5c6ad5b7b56c81")
 api := oneandone.New(token, oneandone.BaseUrl)
 ```
 
-Refer to the [Example](#example) and [Operations](#operations) sections for additional information.
+Refer to the [Examples](#examples) and [Operations](#operations) sections for additional information.
 
 ## <a name="operations"></a>Operations
 
@@ -185,7 +185,22 @@ req := oneandone.ServerRequest {
     },
   }
 	
-server, err := api.CreateServer(&req)
+server_id, server, err := api.CreateServer(&req)
+```
+
+**Create a fixed-size server and return back the server's IP address and first password:**
+
+```
+req := oneandone.ServerRequest {
+    Name:        server_name,
+    ApplianceId: server_appliance_id,
+    PowerOn:     true_or_false,
+    Hardware:    oneandone.Hardware {
+          FixedInsSizeId: fixed_instance_size_id,
+      },
+  }
+
+ip_address, password, err := api.CreateServerEx(&req, timeout)
 ```
 
 **Update a server:**
@@ -376,7 +391,7 @@ request := oneandone.ImageConfig {
     NumImages: number_of_images,
   }
 
-image, err = api.CreateImage(&request)
+image_id, image, err = api.CreateImage(&request)
 ```
 All fields except `Description` are required. `Frequency` may be set to `"ONCE"`, `"DAILY"` or `"WEEKLY"`.
 
@@ -425,7 +440,7 @@ request := oneandone.SharedStorageRequest {
     Size: oneandone.Int2Pointer(size),
   }
   
-ss, err := api.CreateSharedStorage(&request)
+ss_id, ss, err := api.CreateSharedStorage(&request)
 ```
 `Description` is optional parameter.
 
@@ -524,14 +539,14 @@ request := oneandone.FirewallPolicyRequest {
     Rules: []oneandone.FirewallPolicyRule {
       {
         Protocol: protocol,
-        PortFrom: port_from,
-        PortTo: port_to,
+        PortFrom: oneandone.Int2Pointer(port_from),
+        PortTo: oneandone.Int2Pointer(port_to),
         SourceIp: source_ip,
       },
     },
   }
   
-firewall, err := api.CreateFirewallPolicy(&request)
+firewall_id, firewall, err := api.CreateFirewallPolicy(&request)
 ```
 `SourceIp` and `Description` are optional parameters.
 
@@ -586,14 +601,14 @@ Passing an empty string in `fp_new_name` or `fp_new_description` skips updating 
 fp_rules := []oneandone.FirewallPolicyRule {
     {
       Protocol: protocol1,
-      PortFrom: port_from1,
-      PortTo: port_to1,
+      PortFrom: oneandone.Int2Pointer(port_from1),
+      PortTo: oneandone.Int2Pointer(port_to1),
       SourceIp: source_ip,
     },
     {
       Protocol: protocol2,
-      PortFrom: port_from2,
-      PortTo: port_to2,
+      PortFrom: oneandone.Int2Pointer(port_from2),
+      PortTo: oneandone.Int2Pointer(port_to2),
     },
   }
 
@@ -655,7 +670,7 @@ request := oneandone.LoadBalancer {
     },
   }
   
-loadbalancer, err := api.CreateLoadBalancer(&request)
+loadbalancer_id, loadbalancer, err := api.CreateLoadBalancer(&request)
 ```
 Optional parameters are `HealthCheckPath`, `HealthCheckPathParser`, `Source` and `Description`. Load balancer `Method` must be set to `"ROUND_ROBIN"` or `"LEAST_CONNECTIONS"`.
 
@@ -770,7 +785,7 @@ If any of the parameters `sort`, `query` or `fields` is set to an empty string, 
 
 **Create a public IP:**
 
-`public_ip, err := api.CreatePublicIp(ip_type, reverse_dns)`
+`ip_id, public_ip, err := api.CreatePublicIp(ip_type, reverse_dns)`
 
 Both parameters are optional and may be left blank. `ip_type` may be set to `"IPV4"` or `"IPV6"`. Presently, only IPV4 is supported.
 
@@ -823,7 +838,7 @@ request := oneandone.PrivateNetworkRequest {
     SubnetMask: subnet_mask,
   }
 
-private_net, err := api.CreatePrivateNetwork(&request)
+pnet_id, private_net, err := api.CreatePrivateNetwork(&request)
 ```
 Private network `Name` is required parameter.
 
@@ -1007,7 +1022,7 @@ request := oneandone.MonitoringPolicy {
     },
   }
   
-mon_policy, err := api.CreateMonitoringPolicy(&request)
+mpolicy_id, mon_policy, err := api.CreateMonitoringPolicy(&request)
 ```
 All fields, except `Description`, are required. `AlertIf` property accepts values `"RESPONDING"`/`"NOT_RESPONDING"` for ports, and `"RUNNING"`/`"NOT_RUNNING"` for processes.
 
@@ -1274,7 +1289,7 @@ request := oneandone.UserRequest {
     Email: user_email,
   }
   
-user, err := api.CreateUser(&request)
+user_id, user, err := api.CreateUser(&request)
 ```
 `Name` and `Password` are required parameters. The password must contain at least 8 characters using uppercase letters, numbers and other special symbols.
 
@@ -1415,7 +1430,7 @@ If any of the parameters `sort`, `query` or `fields` is blank, it is ignored in 
 `dvd_iso, err := api.GetDvdIso(dvd_id)`
 
 
-## <a name="example"></a>Example
+## <a name="examples"></a>Examples
 
 ```Go
 package main
@@ -1460,14 +1475,14 @@ func main() {
 			},
 		},
 	}
-	server, err := api.CreateServer(&req)
+	server_id, server, err := api.CreateServer(&req)
 	if err == nil {
 		// Wait until server is created and powered on for at most 60 x 10 seconds
 		err = api.WaitForState(server, "POWERED_ON", 10, 60)
 	}
 	
 	// Get a server
-	server, err = api.GetServer(server.Id)
+	server, err = api.GetServer(server_id)
 	
 	// Create a load balancer
 	lbr := oneandone.LoadBalancer {
@@ -1488,7 +1503,8 @@ func main() {
 		},
 	}
 	var lb *oneandone.LoadBalancer
-	lb, err = api.CreateLoadBalancer(&lbr)
+	var lb_id string
+	lb_id, lb, err = api.CreateLoadBalancer(&lbr)
 	if err != nil {
 		api.WaitForState(lb, "ACTIVE", 10, 30)
 	}
@@ -1497,7 +1513,7 @@ func main() {
 	lb, err = api.GetLoadBalancer(lb.Id)
 	
 	// Assign a load balancer to server's IP
-	server, err = api.AssignServerIpLoadBalancer(server.Id, server.Ips[0].Id, lb.Id)
+	server, err = api.AssignServerIpLoadBalancer(server.Id, server.Ips[0].Id, lb_id)
 	
 	// Create a firewall policy
 	fpr := oneandone.FirewallPolicyRequest{
@@ -1506,19 +1522,20 @@ func main() {
 		Rules: []oneandone.FirewallPolicyRule {
 			{
 				Protocol: "TCP",
-				PortFrom: 80,
-				PortTo: 80,
+				PortFrom: oneandone.Int2Pointer(80),
+				PortTo: oneandone.Int2Pointer(80),
 			},
 		},
 	}
 	var fp *oneandone.FirewallPolicy
-	fp, err = api.CreateFirewallPolicy(&fpr)
+	var fp_id string
+	fp_id, fp, err = api.CreateFirewallPolicy(&fpr)
 	if err == nil {
 		api.WaitForState(fp, "ACTIVE", 10, 30)
 	}
 	
 	// Get a firewall policy
-	fp, err = api.GetFirewallPolicy(fp.Id)
+	fp, err = api.GetFirewallPolicy(fp_id)
 	
 	// Add servers IPs to a firewall policy.
 	ips := []string{ server.Ips[0].Id }
@@ -1564,7 +1581,8 @@ func main() {
 		Size: oneandone.Int2Pointer(100),
 	}
 	var ss *oneandone.SharedStorage
-	ss, err = api.CreateSharedStorage(&ssr)
+	var ss_id string
+	ss_id, ss, err = api.CreateSharedStorage(&ssr)
 	if err != nil {
 		api.WaitForState(ss, "ACTIVE", 10, 30)
 	}
@@ -1578,7 +1596,7 @@ func main() {
 	shs, err = api.ListSharedStorages(0, 0, "", "example", "")
 	
 	// Delete a shared storage
-	ss, err = api.DeleteSharedStorage(ss.Id)
+	ss, err = api.DeleteSharedStorage(ss_id)
 	if err == nil {
 		err = api.WaitUntilDeleted(ss)
 	}
@@ -1587,6 +1605,73 @@ func main() {
 	server, err = api.DeleteServer(server.Id, false)
 	if err == nil {
 		err = api.WaitUntilDeleted(server)
+	}
+}
+```
+The next example illustrates how to create a `TYPO3` application server of a fixed size with an initial password and a firewall policy that has just been created.
+
+```Go
+package main
+
+import "github.com/1and1/oneandone-cloudserver-sdk-go"
+
+func main() {
+	token := oneandone.SetToken("bde36026df9d548f699ea97e75a7e87f")
+	client := oneandone.New(token, oneandone.BaseUrl)
+
+	// Create a new firewall policy
+	fpr := oneandone.FirewallPolicyRequest{
+		Name: "HTTPS Traffic Policy",
+		Rules: []oneandone.FirewallPolicyRule{
+			{
+				Protocol: "TCP",
+				PortFrom: oneandone.Int2Pointer(443),
+				PortTo:   oneandone.Int2Pointer(443),
+			},
+		},
+	}
+
+	_, fp, err := client.CreateFirewallPolicy(&fpr)
+	if fp != nil && err == nil {
+		client.WaitForState(fp, "ACTIVE", 5, 60)
+
+		// Look for the TYPO3 application appliance
+		saps, _ := client.ListServerAppliances(0, 0, "", "typo3", "")
+
+		var sa oneandone.ServerAppliance
+		for _, a := range saps {
+			if a.IsAutomaticInstall && a.Type == "APPLICATION" {
+				sa = a
+				break
+			}
+		}
+
+		var fixed_flavours []oneandone.FixedInstanceInfo
+		var fixed_size_id string
+
+		fixed_flavours, err = client.ListFixedInstanceSizes()
+		for _, fl := range fixed_flavours {
+			//look for 'M' size
+			if fl.Name == "VPS_M" {
+				fixed_size_id = fl.Id
+				break
+			}
+		}
+
+		req := oneandone.ServerRequest{
+			Name:        "TYPO3 Server",
+			ApplianceId: sa.Id,
+			PowerOn:     true,
+			Password:    "ucr_kXW8,.2SdMU",
+			Hardware: oneandone.Hardware{
+				FixedInsSizeId: fixed_size_id,
+			},
+			FirewallPolicyId: fp.Id,
+		}
+		_, server, _ := client.CreateServer(&req)
+		if server != nil {
+			client.WaitForState(server, "POWERED_ON", 10, 90)
+		}
 	}
 }
 ```
@@ -1645,34 +1730,37 @@ func (api *API) AttachPrivateNetworkServers(pn_id string, sids []string) (*Priva
 func (api *API) CloneServer(server_id string, new_name string) (*Server, error)
 ```
 ```Go
-func (api *API) CreateFirewallPolicy(fp_data *FirewallPolicyRequest) (*FirewallPolicy, error)
+func (api *API) CreateFirewallPolicy(fp_data *FirewallPolicyRequest) (string, *FirewallPolicy, error)
 ```
 ```Go
-func (api *API) CreateImage(request *ImageConfig) (*Image, error)
+func (api *API) CreateImage(request *ImageConfig) (string, *Image, error)
 ```
 ```Go
-func (api *API) CreateLoadBalancer(lb *LoadBalancer) (*LoadBalancer, error)
+func (api *API) CreateLoadBalancer(lb *LoadBalancer) (string, *LoadBalancer, error)
 ```
 ```Go
-func (api *API) CreateMonitoringPolicy(mp *MonitoringPolicy) (*MonitoringPolicy, error)
+func (api *API) CreateMonitoringPolicy(mp *MonitoringPolicy) (string, *MonitoringPolicy, error)
 ```
 ```Go
-func (api *API) CreatePrivateNetwork(request *PrivateNetworkRequest) (*PrivateNetwork, error)
+func (api *API) CreatePrivateNetwork(request *PrivateNetworkRequest) (string, *PrivateNetwork, error)
 ```
 ```Go
-func (api *API) CreatePublicIp(ip_type string, reverse_dns string) (*PublicIp, error)
+func (api *API) CreatePublicIp(ip_type string, reverse_dns string) (string, *PublicIp, error)
 ```
 ```Go
-func (api *API) CreateServer(request *ServerRequest) (*Server, error)
+func (api *API) CreateServer(request *ServerRequest) (string, *Server, error)
+```
+```Go
+func (api *API) CreateServerEx(request *ServerRequest, timeout int) (string, string, error)
 ```
 ```Go
 func (api *API) CreateServerSnapshot(server_id string) (*Server, error)
 ```
 ```Go
-func (api *API) CreateSharedStorage(request *SharedStorageRequest) (*SharedStorage, error)
+func (api *API) CreateSharedStorage(request *SharedStorageRequest) (string, *SharedStorage, error)
 ```
 ```Go
-func (api *API) CreateUser(user *UserRequest) (*User, error)
+func (api *API) CreateUser(user *UserRequest) (string, *User, error)
 ```
 ```Go
 func (api *API) DeleteFirewallPolicy(fp_id string) (*FirewallPolicy, error)

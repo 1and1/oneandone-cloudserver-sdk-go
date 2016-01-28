@@ -2,6 +2,7 @@ package oneandone
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 )
 
@@ -137,7 +138,7 @@ func (api *API) ListServers(args ...interface{}) ([]Server, error) {
 }
 
 // POST /servers
-func (api *API) CreateServer(request *ServerRequest) (*Server, error) {
+func (api *API) CreateServer(request *ServerRequest) (string, *Server, error) {
 	result := new(Server)
 	url := createUrl(api, serverPathSegment)
 	insert2map := func(hasht map[string]interface{}, key string, value string) {
@@ -169,11 +170,42 @@ func (api *API) CreateServer(request *ServerRequest) (*Server, error) {
 	}
 	err := api.Client.Post(url, &req, &result, http.StatusAccepted)
 	if err != nil {
-		return nil, err
+		return "", nil, err
 	}
 	result.api = api
 	result.decodeRaws()
-	return result, nil
+	return result.Id, result, nil
+}
+
+// This is a wraper function for `CreateServer` that returns the server's IP address and first password.
+// The function waits at most `timeout` seconds for the server to be created.
+// The initial `POST /servers` response does not contain the IP address, so we need to wait
+// until the server is created.
+func (api *API) CreateServerEx(request *ServerRequest, timeout int) (string, string, error) {
+	id, server, err := api.CreateServer(request)
+	if server != nil && err == nil {
+		count := timeout / 5
+		if request.PowerOn {
+			err = api.WaitForState(server, "POWERED_ON", 5, count)
+		} else {
+			err = api.WaitForState(server, "POWERED_OFF", 5, count)
+		}
+		if err != nil {
+			return "", "", err
+		}
+		server, err := api.GetServer(id)
+		if server != nil && err == nil && server.Ips[0].Ip != "" {
+			if server.FirstPassword != "" {
+				return server.Ips[0].Ip, server.FirstPassword, nil
+			}
+			if request.Password != "" {
+				return server.Ips[0].Ip, request.Password, nil
+			}
+			// should never reach here
+			return "", "", errors.New("No server's password was found.")
+		}
+	}
+	return "", "", err
 }
 
 // GET /servers/{id}
