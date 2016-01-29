@@ -97,12 +97,6 @@ type Licence struct {
 	nameField
 }
 
-type errorResponse struct {
-	Type    string `json:"Type"`
-	Message string `json:"Message"`
-	// TODO Errors is missing by intention due to unclear meaning
-}
-
 // Creates a new API instance.
 //
 // Explanations about given token and url information can be found online under the following url TODO add url!

@@ -62,15 +62,15 @@ func (api *API) ListLoadBalancers(args ...interface{}) ([]LoadBalancer, error) {
 }
 
 // POST /load_balancers
-func (api *API) CreateLoadBalancer(lb *LoadBalancer) (*LoadBalancer, error) {
+func (api *API) CreateLoadBalancer(lb *LoadBalancer) (string, *LoadBalancer, error) {
 	url := createUrl(api, loadBalancerPathSegment)
 	result := new(LoadBalancer)
 	err := api.Client.Post(url, &lb, &result, http.StatusAccepted)
 	if err != nil {
-		return nil, err
+		return "", nil, err
 	}
 	result.api = api
-	return result, nil
+	return result.Id, result, nil
 }
 
 // GET /load_balancers/{id}

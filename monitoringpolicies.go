@@ -72,15 +72,15 @@ func (api *API) ListMonitoringPolicies(args ...interface{}) ([]MonitoringPolicy,
 }
 
 // POST /monitoring_policies
-func (api *API) CreateMonitoringPolicy(mp *MonitoringPolicy) (*MonitoringPolicy, error) {
+func (api *API) CreateMonitoringPolicy(mp *MonitoringPolicy) (string, *MonitoringPolicy, error) {
 	result := new(MonitoringPolicy)
 	url := createUrl(api, monitorPolicyPathSegment)
 	err := api.Client.Post(url, &mp, &result, http.StatusCreated)
 	if err != nil {
-		return nil, err
+		return "", nil, err
 	}
 	result.api = api
-	return result, nil
+	return result.Id, result, nil
 }
 
 // GET /monitoring_policies/{id}

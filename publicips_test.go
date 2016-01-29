@@ -36,9 +36,13 @@ func wait_for_ip_ready(ip_address *PublicIp, sec time.Duration, count int, state
 
 func create_public_ip() *PublicIp {
 	fmt.Printf("Creating an IPV4 public ip...\n")
-	pip, err := api.CreatePublicIp(IpTypeV4, ip_dns)
+	pip_id, pip, err := api.CreatePublicIp(IpTypeV4, ip_dns)
 	if err != nil {
 		fmt.Printf("Unable to create a public ip address. Error: %s", err.Error())
+		return nil
+	}
+	if pip_id == "" || pip.Id == "" {
+		fmt.Printf("Unable to create a public ip address.")
 		return nil
 	}
 	return wait_for_ip_ready(pip, 5, 30, "ACTIVE")
@@ -99,7 +103,7 @@ func TestListPublicIps(t *testing.T) {
 		t.Errorf("No public ip found.")
 	}
 
-	ips, err = api.ListPublicIps(1, 3, "", "", "id,ip")
+	ips, err = api.ListPublicIps(1, 3, "id", "", "id,ip")
 	if err != nil {
 		t.Errorf("ListPublicIps with parameter options failed. Error: " + err.Error())
 	}

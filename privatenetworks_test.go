@@ -34,13 +34,13 @@ func create_private_netwok() *PrivateNetwork {
 		SubnetMask:     sub_mask,
 	}
 	fmt.Printf("Creating new private network '%s'...\n", pn_name)
-	prn, err := api.CreatePrivateNetwork(&req)
+	prn_id, prn, err := api.CreatePrivateNetwork(&req)
 	if err != nil {
 		fmt.Printf("Unable to create a private network. Error: %s", err.Error())
 		return nil
 	}
-	if prn.Id == "" {
-		fmt.Printf("Unable to create a private network.")
+	if prn_id == "" || prn.Id == "" {
+		fmt.Printf("Unable to create private network '%s'.", pn_name)
 		return nil
 	}
 

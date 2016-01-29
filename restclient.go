@@ -99,17 +99,15 @@ func isError(response *http.Response, expectedStatus int, err error) error {
 		}
 		body, _ := ioutil.ReadAll(response.Body)
 		// extract the API's error message to be returned later
-		errorResponse := new(errorResponse)
-		err = json.Unmarshal(body, errorResponse)
+		er_resp := new(errorResponse)
+		err = json.Unmarshal(body, er_resp)
 		if err != nil {
 			return err
 		}
 
-		return apiError{response.StatusCode, errorResponse.Message}
-	} else {
-		// no response from API means generic error
+		return apiError{response.StatusCode, fmt.Sprintf("Type: %s; Message: %s", er_resp.Type, er_resp.Message)}
 	}
-	return nil
+	return errors.New("Generic error - no response from the REST API service.")
 }
 
 func createUrl(api *API, sections ...interface{}) string {

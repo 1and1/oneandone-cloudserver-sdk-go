@@ -45,9 +45,13 @@ func create_load_balancer() *LoadBalancer {
 		},
 	}
 	fmt.Printf("Creating new load balancer '%s'...\n", test_lb_name)
-	lb, err := api.CreateLoadBalancer(&req)
+	lb_id, lb, err := api.CreateLoadBalancer(&req)
 	if err != nil {
 		fmt.Printf("Unable to create a load balancer. Error: %s", err.Error())
+		return nil
+	}
+	if lb_id == "" || lb.Id == "" {
+		fmt.Printf("Unable to create load balancer '%s'.", test_lb_name)
 		return nil
 	}
 

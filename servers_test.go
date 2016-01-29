@@ -49,13 +49,13 @@ func wait_for_action_done(srv *Server, sec time.Duration, count int) *Server {
 
 func setup_server() {
 	fmt.Println("Deploying a test server...")
-	srv, err := create_test_server(false)
+	srv_id, srv, err := create_test_server(false)
 
 	if err != nil {
 		fmt.Printf("Unable to create the server. Error: %s", err.Error())
 		return
 	}
-	if len(srv.Id) == 0 {
+	if srv_id == "" || srv.Id == "" {
 		fmt.Printf("Unable to create the server.")
 		return
 	} else {
@@ -71,12 +71,12 @@ func setup_server() {
 	server = srv
 }
 
-func get_random_appliance() ServerAppliance {
+func get_random_appliance(max_disk_size int) ServerAppliance {
 	rand.Seed(time.Now().UnixNano())
 	saps, _ := api.ListServerAppliances()
 	for {
 		i := rand.Intn(len(saps))
-		if saps[i].IsAutomaticInstall && saps[i].MinHddSize <= hdd_size && saps[i].Type == "IMAGE" {
+		if saps[i].IsAutomaticInstall && saps[i].MinHddSize <= max_disk_size && saps[i].Type == "IMAGE" {
 			return saps[i]
 		}
 	}
@@ -87,12 +87,12 @@ func get_default_mon_policy() MonitoringPolicy {
 	return mps[len(mps)-1]
 }
 
-func create_test_server(power_on bool) (*Server, error) {
+func create_test_server(power_on bool) (string, *Server, error) {
 	rand.Seed(time.Now().UnixNano())
 	server_name = fmt.Sprintf("TestServer_%d", rand.Intn(1000000))
 	fmt.Printf("Creating test server '%s'...\n", server_name)
 
-	sap := get_random_appliance()
+	sap := get_random_appliance(hdd_size)
 	ser_app_id = sap.Id
 	mp := get_default_mon_policy()
 
@@ -114,8 +114,8 @@ func create_test_server(power_on bool) (*Server, error) {
 			},
 		},
 	}
-	server, err := api.CreateServer(&req)
-	return server, err
+	ser_id, server, err := api.CreateServer(&req)
+	return ser_id, server, err
 }
 
 func load_server_dvd(ser_id string) {
@@ -162,6 +162,43 @@ func TestCreateServer(t *testing.T) {
 	}
 	if server.Hardware.Ram != ram {
 		t.Errorf("Wrong RAM size on server '%s'.", server.Name)
+	}
+}
+
+func TestCreateServerEx(t *testing.T) {
+	fmt.Println("Creating a fixed-size server...")
+	var size_s FixedInstanceInfo
+	fixed_flavours, _ := api.ListFixedInstanceSizes()
+	for _, fl := range fixed_flavours {
+		if fl.Name == "VPS_S" {
+			size_s = fl
+			break
+		}
+	}
+	sap := get_random_appliance(size_s.Hardware.Hdds[0].Size)
+
+	req := ServerRequest{
+		Name:        "Random S Server",
+		ApplianceId: sap.Id,
+		Hardware: Hardware{
+			FixedInsSizeId: size_s.Id,
+		},
+	}
+	ip, password, err := api.CreateServerEx(&req, 1800)
+
+	if ip == "" {
+		t.Errorf("CreateServerEx failed. Server IP address cannot be blank.")
+	}
+	if password == "" {
+		t.Errorf("CreateServerEx failed. Password cannot be blank.")
+	}
+	if err != nil {
+		t.Errorf("CreateServerEx failed. Error: " + err.Error())
+		return
+	}
+	srvs, _ := api.ListServers(0, 0, "", ip, "")
+	if len(srvs) > 0 {
+		api.DeleteServer(srvs[0].Id, false)
 	}
 }
 
@@ -606,7 +643,7 @@ func TestGetServerImage(t *testing.T) {
 
 func TestReinstallServerImage(t *testing.T) {
 	set_server.Do(setup_server)
-	sap := get_random_appliance()
+	sap := get_random_appliance(hdd_size)
 	fps, _ := api.ListFirewallPolicies(0, 0, "creation_date", sap.OsFamily, "id,name,default")
 	fp_id := ""
 	for _, fp := range fps {

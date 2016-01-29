@@ -28,18 +28,18 @@ func create_firewall_policy() *FirewallPolicy {
 		Rules: []FirewallPolicyRule{
 			{
 				Protocol: "UDP",
-				PortFrom: 161,
-				PortTo:   162,
+				PortFrom: Int2Pointer(161),
+				PortTo:   Int2Pointer(162),
 			},
 		},
 	}
 	fmt.Printf("Creating new firewall policy '%s'...\n", test_fp_name)
-	fp, err := api.CreateFirewallPolicy(&req)
+	fp_id, fp, err := api.CreateFirewallPolicy(&req)
 	if err != nil {
 		fmt.Printf("Unable to create firewall policy '%s'. Error: %s", test_fp_name, err.Error())
 		return nil
 	}
-	if fp.Id == "" {
+	if fp_id == "" || fp.Id == "" {
 		fmt.Printf("Unable to create firewall policy '%s'.", test_fp_name)
 		return nil
 	}
@@ -242,10 +242,10 @@ func TestGetFirewallPolicyRule(t *testing.T) {
 	if fp_rule.Id != test_fp.Rules[0].Id {
 		t.Errorf("Wrong rule ID.")
 	}
-	if fp_rule.PortFrom != test_fp.Rules[0].PortFrom {
+	if *fp_rule.PortFrom != *test_fp.Rules[0].PortFrom {
 		t.Errorf("Wrong rule port_from field.")
 	}
-	if fp_rule.PortTo != test_fp.Rules[0].PortTo {
+	if *fp_rule.PortTo != *test_fp.Rules[0].PortTo {
 		t.Errorf("Wrong rule port_to field.")
 	}
 	if fp_rule.Protocol != test_fp.Rules[0].Protocol {
@@ -286,14 +286,25 @@ func TestAddFirewallPolicyRules(t *testing.T) {
 	rules := []FirewallPolicyRule{
 		{
 			Protocol: "TCP",
-			PortFrom: 4567,
-			PortTo:   4567,
+			PortFrom: Int2Pointer(4567),
+			PortTo:   Int2Pointer(4567),
 			SourceIp: "0.0.0.0",
 		},
 		{
-			Protocol: "TCP",
-			PortFrom: 143,
-			PortTo:   143,
+			Protocol: "TCP/UDP",
+			PortFrom: Int2Pointer(143),
+			PortTo:   Int2Pointer(143),
+		},
+		{
+			Protocol: "GRE", // PortFrom & PortTo are optional for GRE, ICMP and IPSEC protocols.
+		},
+		{
+			Protocol: "ICMP",
+			PortFrom: nil,
+			PortTo:   nil,
+		},
+		{
+			Protocol: "IPSEC",
 		},
 	}
 	fp, err := api.AddFirewallPolicyRules(test_fp.Id, rules)
@@ -304,7 +315,7 @@ func TestAddFirewallPolicyRules(t *testing.T) {
 		api.WaitForState(fp, "ACTIVE", 10, 60)
 	}
 	fp, _ = api.GetFirewallPolicy(fp.Id)
-	if len(fp.Rules) != 3 {
+	if len(fp.Rules) != 6 {
 		t.Errorf("Unable to add rules to firewall policy '%s'.\n", test_fp.Name)
 	}
 }
@@ -318,7 +329,7 @@ func TestListFirewallPolicyRules(t *testing.T) {
 	if err != nil {
 		t.Errorf("ListFirewallPolicyRules failed. Error: " + err.Error())
 	}
-	if len(fp_rules) != 3 {
+	if len(fp_rules) != 6 {
 		t.Errorf("Wrong number of rules found at firewall policy '%s'.", test_fp.Name)
 	}
 }
@@ -339,7 +350,7 @@ func TestDeleteFirewallPolicyRule(t *testing.T) {
 	if err != nil {
 		t.Errorf("Deleting rule from the firewall policy failed.")
 	}
-	if len(fp.Rules) != 2 {
+	if len(fp.Rules) != 5 {
 		t.Errorf("Rule not deleted from the firewall policy.")
 	}
 	for _, rule := range fp.Rules {

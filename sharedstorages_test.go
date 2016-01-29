@@ -28,9 +28,13 @@ func create_shared_storage() *SharedStorage {
 		Size:        Int2Pointer(50),
 	}
 	fmt.Printf("Creating new shared storage '%s'...\n", test_ss_name)
-	ss, err := api.CreateSharedStorage(&req)
+	ss_id, ss, err := api.CreateSharedStorage(&req)
 	if err != nil {
 		fmt.Printf("Unable to create a shared storage. Error: %s", err.Error())
+		return nil
+	}
+	if ss_id == "" || ss.Id == "" {
+		fmt.Printf("Unable to create shared storage '%s'.", test_ss_name)
 		return nil
 	}
 

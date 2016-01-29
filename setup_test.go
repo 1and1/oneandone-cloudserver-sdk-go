@@ -54,7 +54,7 @@ func printObject(in interface{}) {
 }
 
 func deploy_test_server(power_on bool) {
-	test_server, _ = create_test_server(power_on)
+	_, test_server, _ = create_test_server(power_on)
 	if power_on {
 		api.WaitForState(test_server, "POWERED_ON", 10, 70)
 	} else {

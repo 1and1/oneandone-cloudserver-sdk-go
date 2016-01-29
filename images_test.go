@@ -37,9 +37,13 @@ func create_image(ser_id string) *Image {
 		NumImages:   img_numb,
 	}
 	fmt.Printf("Creating image '%s'...\n", image_name)
-	img, err := api.CreateImage(&req)
+	img_id, img, err := api.CreateImage(&req)
 	if err != nil {
 		fmt.Printf("Unable to create new image. Error: %s", err.Error())
+		return nil
+	}
+	if img_id == "" || img.Id == "" {
+		fmt.Printf("Unable to create image '%s'.", image_name)
 		return nil
 	}
 	api.WaitForState(img, "ACTIVE", 10, 60)
@@ -47,7 +51,7 @@ func create_image(ser_id string) *Image {
 }
 
 func setup_image() {
-	image_serv, _ = create_test_server(true)
+	_, image_serv, _ = create_test_server(true)
 	api.WaitForState(image_serv, "POWERED_ON", 10, 70)
 	test_image = create_image(image_serv.Id)
 }

@@ -42,15 +42,15 @@ func (api *API) ListPrivateNetworks(args ...interface{}) ([]PrivateNetwork, erro
 }
 
 // POST /private_networks
-func (api *API) CreatePrivateNetwork(request *PrivateNetworkRequest) (*PrivateNetwork, error) {
+func (api *API) CreatePrivateNetwork(request *PrivateNetworkRequest) (string, *PrivateNetwork, error) {
 	result := new(PrivateNetwork)
 	url := createUrl(api, privateNetworkPathSegment)
 	err := api.Client.Post(url, &request, &result, http.StatusAccepted)
 	if err != nil {
-		return nil, err
+		return "", nil, err
 	}
 	result.api = api
-	return result, nil
+	return result.Id, result, nil
 }
 
 // GET /private_networks/{id}

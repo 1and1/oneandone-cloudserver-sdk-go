@@ -3,8 +3,9 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/1and1/oneandone-cloudserver-sdk-go"
 	"time"
+
+	"github.com/1and1/oneandone-cloudserver-sdk-go"
 )
 
 func main() {
@@ -44,14 +45,14 @@ func main() {
 			},
 		},
 	}
-	server, err := api.CreateServer(&req)
+	server_id, server, err := api.CreateServer(&req)
 	if err == nil {
 		// Wait until server is created and powered on for at most 60 x 10 seconds
 		err = api.WaitForState(server, "POWERED_ON", 10, 60)
 	}
 
 	// Get a server
-	server, err = api.GetServer(server.Id)
+	server, err = api.GetServer(server_id)
 
 	//	printObject(server)
 	//	time.Sleep(time.Second * 10)
@@ -75,7 +76,8 @@ func main() {
 		},
 	}
 	var lb *oneandone.LoadBalancer
-	lb, err = api.CreateLoadBalancer(&lbr)
+	var lb_id string
+	lb_id, lb, err = api.CreateLoadBalancer(&lbr)
 	if err != nil {
 		api.WaitForState(lb, "ACTIVE", 10, 30)
 	}
@@ -87,7 +89,7 @@ func main() {
 	//	time.Sleep(time.Second * 10)
 
 	// Assign a load balancer to server's IP
-	server, err = api.AssignServerIpLoadBalancer(server.Id, server.Ips[0].Id, lb.Id)
+	server, err = api.AssignServerIpLoadBalancer(server.Id, server.Ips[0].Id, lb_id)
 
 	//	printObject(server)
 	//	time.Sleep(time.Second * 10)
@@ -99,19 +101,20 @@ func main() {
 		Rules: []oneandone.FirewallPolicyRule{
 			{
 				Protocol: "TCP",
-				PortFrom: 80,
-				PortTo:   80,
+				PortFrom: oneandone.Int2Pointer(80),
+				PortTo:   oneandone.Int2Pointer(80),
 			},
 		},
 	}
 	var fp *oneandone.FirewallPolicy
-	fp, err = api.CreateFirewallPolicy(&fpr)
+	var fp_id string
+	fp_id, fp, err = api.CreateFirewallPolicy(&fpr)
 	if err == nil {
 		api.WaitForState(fp, "ACTIVE", 10, 30)
 	}
 
 	// Get a firewall policy
-	fp, err = api.GetFirewallPolicy(fp.Id)
+	fp, err = api.GetFirewallPolicy(fp_id)
 
 	// Add servers IPs to a firewall policy.
 	ips := []string{server.Ips[0].Id}
@@ -173,7 +176,8 @@ func main() {
 		Size:        oneandone.Int2Pointer(100),
 	}
 	var ss *oneandone.SharedStorage
-	ss, err = api.CreateSharedStorage(&ssr)
+	var ss_id string
+	ss_id, ss, err = api.CreateSharedStorage(&ssr)
 	if err != nil {
 		api.WaitForState(ss, "ACTIVE", 10, 30)
 	}
@@ -196,7 +200,7 @@ func main() {
 	//	time.Sleep(time.Second * 10)
 
 	// Delete a shared storage
-	ss, err = api.DeleteSharedStorage(ss.Id)
+	ss, err = api.DeleteSharedStorage(ss_id)
 	if err == nil {
 		err = api.WaitUntilDeleted(ss)
 	}
@@ -211,6 +215,64 @@ func main() {
 	}
 
 	//	printObject(server)
+
+	//	The next example illustrates how to create a `TYPO3` application server
+	//  of a fixed size with an initial password and a firewall policy that has just been created.
+
+	// Create a new firewall policy
+	fpr = oneandone.FirewallPolicyRequest{
+		Name: "HTTPS Traffic Policy",
+		Rules: []oneandone.FirewallPolicyRule{
+			{
+				Protocol: "TCP",
+				PortFrom: oneandone.Int2Pointer(443),
+				PortTo:   oneandone.Int2Pointer(443),
+			},
+		},
+	}
+
+	_, fp, err = api.CreateFirewallPolicy(&fpr)
+	if fp != nil && err == nil {
+		api.WaitForState(fp, "ACTIVE", 5, 60)
+
+		// Look for the TYPO3 application appliance
+		saps, _ := api.ListServerAppliances(0, 0, "", "typo3", "")
+
+		var sa oneandone.ServerAppliance
+		for _, a := range saps {
+			if a.IsAutomaticInstall && a.Type == "APPLICATION" {
+				sa = a
+				break
+			}
+		}
+
+		var fixed_flavours []oneandone.FixedInstanceInfo
+		var fixed_size_id string
+
+		fixed_flavours, err = api.ListFixedInstanceSizes()
+		for _, fl := range fixed_flavours {
+			//look for 'M' size
+			if fl.Name == "VPS_M" {
+				fixed_size_id = fl.Id
+				break
+			}
+		}
+
+		req := oneandone.ServerRequest{
+			Name:        "TYPO3 Server",
+			ApplianceId: sa.Id,
+			PowerOn:     true,
+			Password:    "ucr_kXW8,.2SdMU",
+			Hardware: oneandone.Hardware{
+				FixedInsSizeId: fixed_size_id,
+			},
+			FirewallPolicyId: fp.Id,
+		}
+		_, server, _ := api.CreateServer(&req)
+		if server != nil {
+			api.WaitForState(server, "POWERED_ON", 10, 90)
+		}
+	}
 }
 
 func printObject(in interface{}) {
