@@ -7,28 +7,28 @@ import (
 type Image struct {
 	idField
 	ImageConfig
-	MinHddSize     int       `json:"min_hdd_size"`
-	Architecture   int       `json:"architecture"`
-	CloudPanelId   string    `json:"cloudpanel_id,omitempty"`
-	CreationDate   string    `json:"creation_date,omitempty"`
-	State          string    `json:"state,omitempty"`
-	OsImageType    string    `json:"os_image_type,omitempty"`
-	OsFamily       string    `json:"os_family,omitempty"`
-	Os             string    `json:"os,omitempty"`
-	OsVersion      string    `json:"os_version,omitempty"`
-	Type           string    `json:"type,omitempty"`
-	AvailableSites []string  `json:"available_sites,omitempty"`
-	Licenses       []Licence `json:"licenses,omitempty"`
-	Hdds           []Hdd     `json:"hdds,omitempty"`
+	MinHddSize     int      `json:"min_hdd_size"`
+	Architecture   int      `json:"architecture"`
+	CloudPanelId   string   `json:"cloudpanel_id,omitempty"`
+	CreationDate   string   `json:"creation_date,omitempty"`
+	State          string   `json:"state,omitempty"`
+	OsImageType    string   `json:"os_image_type,omitempty"`
+	OsFamily       string   `json:"os_family,omitempty"`
+	Os             string   `json:"os,omitempty"`
+	OsVersion      string   `json:"os_version,omitempty"`
+	Type           string   `json:"type,omitempty"`
+	AvailableSites []string `json:"available_sites,omitempty"`
+	Licenses       []string `json:"licenses,omitempty"`
+	Hdds           []Hdd    `json:"hdds,omitempty"`
 	ApiPtr
 }
 
 type ImageConfig struct {
-	Name        string      `json:"name,omitempty"`
-	Description string      `json:"description,omitempty"`
-	Frequency   string      `json:"frequency,omitempty"`
-	ServerId    interface{} `json:"server_id,omitempty"`
-	NumImages   int         `json:"num_images"`
+	Name        string `json:"name,omitempty"`
+	Description string `json:"description,omitempty"`
+	Frequency   string `json:"frequency,omitempty"`
+	ServerId    string `json:"server_id,omitempty"`
+	NumImages   int    `json:"num_images"`
 }
 
 // GET /images

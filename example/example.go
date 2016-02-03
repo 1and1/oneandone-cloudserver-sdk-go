@@ -22,7 +22,7 @@ func main() {
 
 	var sa oneandone.ServerAppliance
 	for _, a := range saps {
-		if a.IsAutomaticInstall && a.Type == "IMAGE" {
+		if a.IsAutomaticInstall && a.Type == "INTERNAL" {
 			sa = a
 		}
 	}

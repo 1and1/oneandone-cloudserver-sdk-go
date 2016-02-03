@@ -5,15 +5,15 @@ import "net/http"
 type ServerAppliance struct {
 	Identity
 	typeField
-	OsImageType        string    `json:"os_image_type,omitempty"`
-	OsFamily           string    `json:"os_family,omitempty"`
-	Os                 string    `json:"os,omitempty"`
-	OsVersion          string    `json:"os_version,omitempty"`
-	MinHddSize         int       `json:"min_hdd_size"`
-	Architecture       int       `json:"architecture"`
-	Licenses           []Licence `json:"licenses,omitempty"`
-	IsAutomaticInstall bool      `json:"automatic_installation"`
-	AvailableSites     []string  `json:"available_sites,omitempty"`
+	OsImageType        string   `json:"os_image_type,omitempty"`
+	OsFamily           string   `json:"os_family,omitempty"`
+	Os                 string   `json:"os,omitempty"`
+	OsVersion          string   `json:"os_version,omitempty"`
+	MinHddSize         int      `json:"min_hdd_size"`
+	Architecture       int      `json:"architecture"`
+	Licenses           []string `json:"licenses,omitempty"`
+	IsAutomaticInstall bool     `json:"automatic_installation"`
+	AvailableSites     []string `json:"available_sites,omitempty"`
 	ApiPtr
 }
 
