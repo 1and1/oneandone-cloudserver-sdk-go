@@ -35,13 +35,14 @@ func (api *API) ListServerAppliances(args ...interface{}) ([]ServerAppliance, er
 }
 
 // GET /server_appliances/{id}
-func (api *API) GetServerAppliance(sa_id string) (*ServerAppliance, error) {
-	res := new(ServerAppliance)
+func (api *API) GetServerAppliance(sa_id string) (interface{}, error) {
+	//	res := new(ServerAppliance)
+	var res interface{}
 	url := createUrl(api, serverAppliancePathSegment, sa_id)
 	err := api.Client.Get(url, &res, http.StatusOK)
 	if err != nil {
 		return nil, err
 	}
-	res.api = api
+	//	res.api = api
 	return res, nil
 }
