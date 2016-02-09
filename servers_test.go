@@ -76,7 +76,7 @@ func get_random_appliance(max_disk_size int) ServerAppliance {
 	saps, _ := api.ListServerAppliances()
 	for {
 		i := rand.Intn(len(saps))
-		if saps[i].IsAutomaticInstall && saps[i].MinHddSize <= max_disk_size && saps[i].Type == "IMAGE" {
+		if saps[i].IsAutomaticInstall && saps[i].MinHddSize <= max_disk_size && saps[i].Type == "INTERNAL" {
 			return saps[i]
 		}
 	}

@@ -52,14 +52,14 @@ func TestListDvdIsos(t *testing.T) {
 		t.Errorf("ListDvdIsos failed to handle incorrect number of passed arguments.")
 	}
 
-	res, err = api.ListDvdIsos(0, 0, "", "TOOLS", "")
+	res, err = api.ListDvdIsos(0, 0, "", "freebsd", "")
 
 	if err != nil {
 		t.Errorf("ListDvdIsos with parameter options failed. Error: " + err.Error())
 	}
 
 	for _, dvd := range res {
-		if !strings.Contains(strings.ToUpper(dvd.Type), "TOOLS") {
+		if !strings.Contains(strings.ToLower(dvd.OsVersion), "freebsd") {
 			t.Errorf("Search parameter failed.")
 		}
 	}

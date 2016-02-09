@@ -93,10 +93,6 @@ type Identity struct {
 	nameField
 }
 
-type Licence struct {
-	nameField
-}
-
 // Creates a new API instance.
 //
 // Explanations about given token and url information can be found online under the following url TODO add url!

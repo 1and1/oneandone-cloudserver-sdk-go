@@ -26,11 +26,11 @@ type Server struct {
 }
 
 type Hardware struct {
-	Vcores            int         `json:"vcore,omitempty"`
-	CoresPerProcessor int         `json:"cores_per_processor"`
-	Ram               float32     `json:"ram"`
-	Hdds              []Hdd       `json:"hdds,omitempty"`
-	FixedInsSizeId    interface{} `json:"fixed_instance_size_id,omitempty"`
+	Vcores            int     `json:"vcore,omitempty"`
+	CoresPerProcessor int     `json:"cores_per_processor"`
+	Ram               float32 `json:"ram"`
+	Hdds              []Hdd   `json:"hdds,omitempty"`
+	FixedInsSizeId    string  `json:"fixed_instance_size_id,omitempty"`
 	ApiPtr
 }
 
@@ -159,9 +159,8 @@ func (api *API) CreateServer(request *ServerRequest) (string, *Server, error) {
 	insert2map(req, "monitoring_policy_id", request.MonitoringPolicyId)
 	insert2map(req, "region_id", request.RegionId)
 	req["hardware"] = hw
-	fis_id, provided := request.Hardware.FixedInsSizeId.(string)
-	if provided && fis_id != "" {
-		hw["fixed_instance_size_id"] = fis_id
+	if request.Hardware.FixedInsSizeId != "" {
+		hw["fixed_instance_size_id"] = request.Hardware.FixedInsSizeId
 	} else {
 		hw["vcore"] = request.Hardware.Vcores
 		hw["cores_per_processor"] = request.Hardware.CoresPerProcessor
