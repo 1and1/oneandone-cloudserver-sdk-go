@@ -25,7 +25,7 @@ This guide contains instructions on getting started with the library and automat
   - [Usages](#usages)
   - [Server Appliances](#server-appliances)
   - [DVD ISO](#dvd-iso)
-- [Example](#example)
+- [Examples](#examples)
 - [Index](#index)
 
 ## Overview
@@ -59,7 +59,7 @@ token := oneandone.SetToken("82ee732b8d47e451be5c6ad5b7b56c81")
 api := oneandone.New(token, oneandone.BaseUrl)
 ```
 
-Refer to the [Example](#example) and [Operations](#operations) sections for additional information.
+Refer to the [Examples](#examples) and [Operations](#operations) sections for additional information.
 
 ## Operations
 
@@ -168,8 +168,22 @@ req := oneandone.ServerRequest {
     },
   }
 
-server, err := api.CreateServer(&req)
+server_id, server, err := api.CreateServer(&req)
+```
 
+**Create a fixed-size server and return back the server's IP address and first password:**
+
+```
+req := oneandone.ServerRequest {
+    Name:        server_name,
+    ApplianceId: server_appliance_id,
+    PowerOn:     true_or_false,
+    Hardware:    oneandone.Hardware {
+          FixedInsSizeId: fixed_instance_size_id,
+      },
+  }
+
+ip_address, password, err := api.CreateServerEx(&req, timeout)
 ```
 
 **Update a server:**
@@ -267,7 +281,6 @@ Set `is_hardware` to true for HARDWARE method of rebooting.
 
 Set `is_hardware` to false for SOFTWARE method of rebooting.
 
-
 **Shutdown a server:**
 
 `server, err := api.ShutdownServer(server_id, is_hardware)`
@@ -276,31 +289,25 @@ Set `is_hardware` to true for HARDWARE method of powering off.
 
 Set `is_hardware` to false for SOFTWARE method of powering off.
 
-
 **Assign a private network to a server:**
 
 `server, err := api.AssignServerPrivateNetwork(server_id, pn_id)`
-
 
 **Remove a server's private network:**
 
 `server, err := api.RemoveServerPrivateNetwork(server_id, pn_id)`
 
-
 **Create a new server's snapshot:**
 
 `server, err := api.CreateServerSnapshot(server_id)`
-
 
 **Restore a server's snapshot:**
 
 `server, err := api.RestoreServerSnapshot(server_id, snapshot_id)`
 
-
 **Remove a server's snapshot:**
 
 `server, err := api.DeleteServerSnapshot(server_id, snapshot_id);`
-
 
 **Clone a server:**
 
@@ -343,7 +350,7 @@ request := oneandone.ImageConfig {
     NumImages: number_of_images,
   }
 
-image, err = api.CreateImage(&request)
+image_id, image, err = api.CreateImage(&request)
 ```
 All fields except `Description` are required. `Frequency` may be set to `"ONCE"`, `"DAILY"` or `"WEEKLY"`.
 
@@ -390,12 +397,12 @@ request := oneandone.SharedStorageRequest {
     Size: oneandone.Int2Pointer(size),
   }
   
-ss, err := api.CreateSharedStorage(&request)
+ss_id, ss, err := api.CreateSharedStorage(&request)
 
 ```
 `Description` is optional parameter.
 
-				
+
 **Update a shared storage:**
 
 ```
@@ -409,7 +416,7 @@ ss, err := api.UpdateSharedStorage(ss_id, &request)
 ```
 All request's parameters are optional.
 
-			
+
 **Remove a shared storage:**
 
 `ss, err := api.DeleteSharedStorage(ss_id)`
@@ -489,14 +496,14 @@ request := oneandone.FirewallPolicyRequest {
     Rules: []oneandone.FirewallPolicyRule {
       {
         Protocol: protocol,
-        PortFrom: port_from,
-        PortTo: port_to,
+        PortFrom: oneandone.Int2Pointer(port_from),
+        PortTo: oneandone.Int2Pointer(port_to),
         SourceIp: source_ip,
       },
     },
   }
   
-firewall, err := api.CreateFirewallPolicy(&request)
+firewall_id, firewall, err := api.CreateFirewallPolicy(&request)
 ```
 `SourceIp` and `Description` are optional parameters.
 
@@ -551,21 +558,20 @@ Passing an empty string in `fp_new_name` or `fp_new_description` skips updating 
 fp_rules := []oneandone.FirewallPolicyRule {
     {
       Protocol: protocol1,
-      PortFrom: port_from1,
-      PortTo: port_to1,
+      PortFrom: oneandone.Int2Pointer(port_from1),
+      PortTo: oneandone.Int2Pointer(port_to1),
       SourceIp: source_ip,
     },
     {
       Protocol: protocol2,
-      PortFrom: port_from2,
-      PortTo: port_to2,
+      PortFrom: oneandone.Int2Pointer(port_from2),
+      PortTo: oneandone.Int2Pointer(port_to2),
     },
   }
 
 firewall, err := api.AddFirewallPolicyRules(fp_id, fp_rules)
 ```
 
-				
 **Remove a rule from a firewall policy:**
 
 `firewall, err := api.DeleteFirewallPolicyRule(fp_id, rule_id)`
@@ -619,7 +625,7 @@ request := oneandone.LoadBalancer {
     },
   }
   
-loadbalancer, err := api.CreateLoadBalancer(&request)
+loadbalancer_id, loadbalancer, err := api.CreateLoadBalancer(&request)
 ```
 Optional parameters are `HealthCheckPath`, `HealthCheckPathParser`, `Source` and `Description`. Load balancer `Method` must be set to `"ROUND_ROBIN"` or `"LEAST_CONNECTIONS"`.
 
@@ -732,7 +738,7 @@ If any of the parameters `sort`, `query` or `fields` is set to an empty string, 
 
 **Create a public IP:**
 
-`public_ip, err := api.CreatePublicIp(ip_type, reverse_dns)`
+`ip_id, public_ip, err := api.CreatePublicIp(ip_type, reverse_dns)`
 
 Both parameters are optional and may be left blank. `ip_type` may be set to `"IPV4"` or `"IPV6"`. Presently, only IPV4 is supported.
 
@@ -781,7 +787,7 @@ request := oneandone.PrivateNetworkRequest {
     SubnetMask: subnet_mask,
   }
 
-private_net, err := api.CreatePrivateNetwork(&request)
+pnet_id, private_net, err := api.CreatePrivateNetwork(&request)
 ```
 Private network `Name` is required parameter.
 
@@ -962,7 +968,7 @@ request := oneandone.MonitoringPolicy {
     },
   }
   
-mon_policy, err := api.CreateMonitoringPolicy(&request)
+mpolicy_id, mon_policy, err := api.CreateMonitoringPolicy(&request)
 ```
 All fields, except `Description`, are required. `AlertIf` property accepts values `"RESPONDING"`/`"NOT_RESPONDING"` for ports, and `"RUNNING"`/`"NOT_RUNNING"` for processes.
 
@@ -1124,852 +1130,492 @@ All properties of the `MonitoringProcess` instance are required.
 **Modify a process of a monitoring policy:**
 
 ```
-
 process := oneandone.MonitoringProcess {
-
     Process: process_name,
-
     AlertIf: running_or_not_running,
-
     EmailNotification: true_or_false,
-
   }
 
-
-
 mon_policy, err := api.ModifyMonitoringPolicyProcess(mp_id, process_id, &process)
-
 ```
 
 *Note:* Process name cannot be changed.
 
-
-
-
-
 **Remove a process from a monitoring policy:**
-
-
 
 `mon_policy, err := api.DeleteMonitoringPolicyProcess(mp_id, process_id)`
 
-
-
-
-
 **List all servers attached to a monitoring policy:**
-
-
 
 `mp_servers, err := api.ListMonitoringPolicyServers(mp_id)`
 
-
-
-
-
 **Retrieve information about a server attached to a monitoring policy:**
-
-
 
 `mp_server, err := api.GetMonitoringPolicyServer(mp_id, server_id)`
 
-
-
-
-
 **Attach servers to a monitoring policy:**
-
-
 
 `mon_policy, err := api.AttachMonitoringPolicyServers(mp_id, server_ids)`
 
-
-
 `server_ids` is a slice of server ID's.
 
-
-
-
-
 **Remove a server from a monitoring policy:**
-
-
 
 `mon_policy, err := api.RemoveMonitoringPolicyServer(mp_id, server_id)`
 
 
-
-
-
 ### Logs
-
-
 
 **List all logs:**
 
-
-
 `logs, err := api.ListLogs(period, nil, nil)`
-
-
 
 `period` can be set to `"LAST_HOUR"`, `"LAST_24H"`, `"LAST_7D"`, `"LAST_30D"`, `"LAST_365D"` or `"CUSTOM"`. If `period` is set to `"CUSTOM"`, the `start_date` and `end_date` parameters are required to be set in **RFC 3339** date/time format (e.g. `2015-13-12T00:01:00Z`).
 
-
-
 `logs, err := api.ListLogs(period, start_date, end_date)`
-
-
 
 Additional query parameters can be used.
 
-
-
 `logs, err := api.ListLogs(period, start_date, end_date, page, per_page, sort, query, fields)`
-
-
 
 To paginate the list of logs received in the response use `page` and `per_page` parameters. Set ` per_page` to the number of logs that will be shown in each page. `page` indicates the current page. When set to an integer value that is less or equal to zero, the parameters are ignored by the framework.
 
-
-
 To receive the list of logs sorted in expected order pass a logs property (e.g. `"action"`) in `sort` parameter. Prefix the sorting attribute with `-` sign for sorting in descending order.
-
-
 
 Use `query` parameter to search for a string in the response and return only the logs instances that contain it.
 
-
-
 To retrieve a collection of logs containing only the requested fields pass a list of comma separated properties (e.g. `"id,action,type"`) in `fields` parameter.
-
-
 
 If any of the parameters `sort`, `query` or `fields` is set to an empty string, it is ignored in the request.
 
-
-
-
-
 **Retrieve a single log:**
-
-
 
 `log, err := api.GetLog(log_id)`
 
 
-
-
-
 ### Users
-
-
 
 **List all users:**
 
-
-
 `users, err := api.ListUsers()`
-
-
 
 Alternatively, use the method with query parameters.
 
-
-
 `users, err := api.ListUsers(page, per_page, sort, query, fields)`
-
-
 
 To paginate the list of users received in the response use `page` and `per_page` parameters. Set ` per_page` to the number of users that will be shown in each page. `page` indicates the current page. When set to an integer value that is less or equal to zero, the parameters are ignored by the framework.
 
-
-
 To receive the list of users sorted in expected order pass a user property (e.g. `"name"`) in `sort` parameter. Prefix the sorting attribute with `-` sign for sorting in descending order.
-
-
 
 Use `query` parameter to search for a string in the response and return only the user instances that contain it.
 
-
-
 To retrieve a collection of users containing only the requested fields pass a list of comma separated properties (e.g. `"id,name,creation_date,email"`) in `fields` parameter.
-
-
 
 If any of the parameters `sort`, `query` or `fields` is set to an empty string, it is ignored in the request.
 
-
-
-
-
 **Retrieve information about a user:**
-
-
 
 `user, err := api.GetUser(user_id)`
 
-
-
-
-
 **Create a user:**
 
-
-
 ```
-
 request := oneandone.UserRequest {
-
     Name: username, 
-
     Description: user_description,
-
     Password: password,
-
     Email: user_email,
-
   }
 
-  
-
-user, err := api.CreateUser(&request)
-
+user_id, user, err := api.CreateUser(&request)
 ```
 
 `Name` and `Password` are required parameters. The password must contain at least 8 characters using uppercase letters, numbers and other special symbols.
 
-
-
-
-
 **Modify a user:**
 
-
-
 ```
-
 request := oneandone.UserRequest {
-
     Description: new_desc,
-
     Email: new_mail,
-
     Password: new_pass,
-
     State: state,
-
   }
 
-  
-
 user, err := api.ModifyUser(user_id, &request)
-
 ```
 
 All listed fields in the request are optional. `State` can be set to `"ACTIVE"` or `"DISABLED"`.
 
-
-
-
-
 **Delete a user:**
-
-
 
 `user, err := api.DeleteUser(user_id)`
 
-
-
-
-
 **Retrieve information about a user's API privileges:**
-
-
 
 `api_info, err := api.GetUserApi(user_id)`
 
-
-
-
-
 **Retrieve a user's API key:**
-
-
 
 `api_key, err := api.GetUserApiKey(user_id)`
 
-
-
-
-
 **List IP's from which API access is allowed for a user:**
-
-
 
 `allowed_ips, err := api.ListUserApiAllowedIps(user_id)`
 
-
-
-
-
 **Add new IP's to a user:**
 
-
-
 ```
-
 user_ips := []string{ my_public_ip, "192.168.7.77", "10.81.12.101" }
-
-
-
 user, err := api.AddUserApiAlowedIps(user_id, user_ips)
-
 ```
-
-
-
-
 
 **Remove an IP and forbid API access from it:**
 
-
-
 `user, err := api.RemoveUserApiAllowedIp(user_id, ip)`
-
-
-
-
 
 **Modify a user's API privileges:**
 
-
-
 `user, err :=  api.ModifyUserApi(user_id, is_active)`
 
-
-
-
-
 **Renew a user's API key:**
-
-
 
 `user, err := api.RenewUserApiKey(user_id)`
 
 
-
-
-
 ### Usages
-
-
 
 **List your usages:**
 
-
-
 `usages, err := api.ListUsages(period, nil, nil)`
-
-
 
 `period` can be set to `"LAST_HOUR"`, `"LAST_24H"`, `"LAST_7D"`, `"LAST_30D"`, `"LAST_365D"` or `"CUSTOM"`. If `period` is set to `"CUSTOM"`, the `start_date` and `end_date` parameters are required to be set in **RFC 3339** date/time format (e.g. `2015-13-12T00:01:00Z`).
 
-
-
 `usages, err := api.ListUsages(period, start_date, end_date)`
-
-
 
 Additional query parameters can be used.
 
-
-
 `usages, err := api.ListUsages(period, start_date, end_date, page, per_page, sort, query, fields)`
-
-
 
 To paginate the list of usages received in the response use `page` and `per_page` parameters. Set ` per_page` to the number of usages that will be shown in each page. `page` indicates the current page. When set to an integer value that is less or equal to zero, the parameters are ignored by the framework.
 
-
-
 To receive the list of usages sorted in expected order pass a usages property (e.g. `"name"`) in `sort` parameter. Prefix the sorting attribute with `-` sign for sorting in descending order.
-
-
 
 Use `query` parameter to search for a string in the response and return only the usages instances that contain it.
 
-
-
 To retrieve a collection of usages containing only the requested fields pass a list of comma separated properties (e.g. `"id,name"`) in `fields` parameter.
-
-
 
 If any of the parameters `sort`, `query` or `fields` is set to an empty string, it is ignored in the request.
 
 
-
-
-
 ### Server Appliances
-
-
 
 **List all the appliances that you can use to create a server:**
 
-
-
 `server_appliances, err := api.ListServerAppliances()`
-
-
 
 Alternatively, use the method with query parameters.
 
-
-
 `server_appliances, err := api.ListServerAppliances(page, per_page, sort, query, fields)`
-
-
 
 To paginate the list of server appliances received in the response use `page` and `per_page` parameters. Set `per_page` to the number of server appliances that will be shown in each page. `page` indicates the current page. When set to an integer value that is less or equal to zero, the parameters are ignored by the framework.
 
-
-
 To receive the list of server appliances sorted in expected order pass a server appliance property (e.g. `"os"`) in `sort` parameter. Prefix the sorting attribute with `-` sign for sorting in descending order.
-
-
 
 Use `query` parameter to search for a string in the response and return only the server appliance instances that contain it.
 
-
-
 To retrieve a collection of server appliances containing only the requested fields pass a list of comma separated properties (e.g. `"id,os,architecture"`) in `fields` parameter.
-
-
 
 If any of the parameters `sort`, `query` or `fields` is blank, it is ignored in the request.
 
-
-
-
-
 **Retrieve information about specific appliance:**
-
-
 
 `server_appliance, err := api.GetServerAppliance(appliance_id)`
 
 
-
-
-
 ### DVD ISO
-
-
 
 **List all operative systems and tools that you can load into your virtual DVD unit:**
 
-
-
 `dvd_isos, err := api.ListDvdIsos()`
-
-
 
 Alternatively, use the method with query parameters.
 
-
-
 `dvd_isos, err := api.ListDvdIsos(page, per_page, sort, query, fields)`
-
-
 
 To paginate the list of ISO DVDs received in the response use `page` and `per_page` parameters. Set `per_page` to the number of ISO DVDs that will be shown in each page. `page` indicates the current page. When set to an integer value that is less or equal to zero, the parameters are ignored by the framework.
 
-
-
 To receive the list of ISO DVDs sorted in expected order pass a ISO DVD property (e.g. `"type"`) in `sort` parameter. Prefix the sorting attribute with `-` sign for sorting in descending order.
-
-
 
 Use `query` parameter to search for a string in the response and return only the ISO DVD instances that contain it.
 
-
-
 To retrieve a collection of ISO DVDs containing only the requested fields pass a list of comma separated properties (e.g. `"id,name,type"`) in `fields` parameter.
-
-
 
 If any of the parameters `sort`, `query` or `fields` is blank, it is ignored in the request.
 
-
-
-
-
 **Retrieve a specific ISO image:**
-
-
 
 `dvd_iso, err := api.GetDvdIso(dvd_id)`
 
 
-
-
-
-## Example
-
-
+## Examples
 
 ```Go
-
 package main
 
-
-
 import (
-
 	"fmt"
-
 	"github.com/1and1/oneandone-cloudserver-sdk-go"
-
 	"time"
-
 )
 
-
-
 func main() {
-
 	//Set an authentication token
-
 	token := oneandone.SetToken("82ee732b8d47e451be5c6ad5b7b56c81")
-
 	//Create an API client
-
 	api := oneandone.New(token, oneandone.BaseUrl)
 
-	
-
 	// List server appliances
-
 	saps, err := api.ListServerAppliances()
 
-	
-
 	var sa oneandone.ServerAppliance
-
 	for _, a := range saps {
-
 		if a.IsAutomaticInstall && a.Type == "IMAGE" {
-
 			sa = a
-
 		}
-
 	}
-
-	
 
 	// Create a server
-
 	req := oneandone.ServerRequest{
-
 		Name:        "Example Server",
-
 		Description: "Example server description.",
-
 		ApplianceId: sa.Id,
-
 		PowerOn:	 true,
-
 		Hardware:    oneandone.Hardware{
-
 			Vcores:            1,
-
 			CoresPerProcessor: 1,
-
 			Ram:               2,
-
 			Hdds: []oneandone.Hdd {
-
 				oneandone.Hdd {
-
 						Size:   sa.MinHddSize,
-
 						IsMain: true,
-
 				},
-
 			},
-
 		},
-
 	}
 
-	server, err := api.CreateServer(&req)
+	server_id, server, err := api.CreateServer(&req)
 
 	if err == nil {
-
 		// Wait until server is created and powered on for at most 60 x 10 seconds
-
 		err = api.WaitForState(server, "POWERED_ON", 10, 60)
-
 	}
 
-	
-
-	// Get a server
-
-	server, err = api.GetServer(server.Id)
-
-	
+	// Get the server
+	server, err = api.GetServer(server_id)
 
 	// Create a load balancer
-
 	lbr := oneandone.LoadBalancer {
-
 		Name: "Load Balancer Example", 
-
 		Description: "API created load balancer.",
-
 		Method: "ROUND_ROBIN",
-
 		Persistence: true,
-
 		PersistenceTime: 1200,
-
 		HealthCheckTest: "TCP",
-
 		HealthCheckInterval: 40,
-
 		Rules: []oneandone.LoadBalancerRule {
-
 				{
-
 					Protocol: "TCP",
-
 					PortBalancer: 80,
-
 					PortServer: 80,
-
 					Source: "0.0.0.0",
-
 				},
-
 		},
-
 	}
 
 	var lb *oneandone.LoadBalancer
+	var lb_id string
 
-	lb, err = api.CreateLoadBalancer(&lbr)
-
+	lb_id, lb, err = api.CreateLoadBalancer(&lbr)
 	if err != nil {
-
 		api.WaitForState(lb, "ACTIVE", 10, 30)
-
 	}
 
-	
-
-	// Get a load balancer
-
+	// Get the load balancer
 	lb, err = api.GetLoadBalancer(lb.Id)
 
-	
-
-	// Assign a load balancer to server's IP
-
-	server, err = api.AssignServerIpLoadBalancer(server.Id, server.Ips[0].Id, lb.Id)
-
-	
+	// Assign the load balancer to server's IP
+	server, err = api.AssignServerIpLoadBalancer(server.Id, server.Ips[0].Id, lb_id)
 
 	// Create a firewall policy
-
 	fpr := oneandone.FirewallPolicyRequest{
-
 		Name: "Firewall Policy Example", 
-
 		Description: "API created firewall policy.",
-
 		Rules: []oneandone.FirewallPolicyRule {
-
 			{
-
 				Protocol: "TCP",
-
-				PortFrom: 80,
-
-				PortTo: 80,
-
+				PortFrom: oneandone.Int2Pointer(80),
+				PortTo: oneandone.Int2Pointer(80),
 			},
-
 		},
-
 	}
 
 	var fp *oneandone.FirewallPolicy
 
-	fp, err = api.CreateFirewallPolicy(&fpr)
-
+	fp_id, fp, err = api.CreateFirewallPolicy(&fpr)
 	if err == nil {
-
 		api.WaitForState(fp, "ACTIVE", 10, 30)
-
 	}
 
-	
+	// Get the firewall policy
+	fp, err = api.GetFirewallPolicy(fp_id)
 
-	// Get a firewall policy
-
-	fp, err = api.GetFirewallPolicy(fp.Id)
-
-	
-
-	// Add servers IPs to a firewall policy.
-
+	// Add servers IPs to the firewall policy.
 	ips := []string{ server.Ips[0].Id }
 
 	fp, err = api.AddFirewallPolicyServerIps(fp.Id, ips)
-
 	if err == nil {
-
 		api.WaitForState(fp, "ACTIVE", 10, 60)
-
 	}
 
-	
-
-	//Shutdown a server using 'SOFTWARE' method
-
+	//Shutdown the server using 'SOFTWARE' method
 	server, err = api.ShutdownServer(server.Id, false)
-
 	if err != nil {
-
 		err = api.WaitForState(server, "POWERED_OFF", 5, 20)
-
 	}
 
-	
-
-	// Delete a load balancer
-
+	// Delete the load balancer
 	lb, err = api.DeleteLoadBalancer(lb.Id)
-
 	if err != nil {
-
 		err = api.WaitUntilDeleted(lb)
-
 	}
 
-	
-
-	// Delete a firewall policy
-
+	// Delete the firewall policy
 	fp, err = api.DeleteFirewallPolicy(fp.Id)
-
 	if err != nil {
-
 		err = api.WaitUntilDeleted(fp)
-
 	}
-
-	
 
 	// List usages in last 24h
-
 	var usages *oneandone.Usages
-
 	usages, err = api.ListUsages("LAST_24H", nil, nil)
-
-	
 
 	fmt.Println(usages.Servers)
 
-	
-
 	// List usages in last 5 hours
-
 	n := time.Now()
-
 	ed := time.Date(n.Year(), n.Month(), n.Day(), n.Hour(), n.Minute(), n.Second(), 0, time.UTC)
-
 	sd := ed.Add(-(time.Hour * 5))
 
 	usages, err = api.ListUsages("CUSTOM", &sd, &ed)
 
-	
-
 	//Create a shared storage
-
 	ssr := oneandone.SharedStorageRequest {
-
 		Name: "Shared Storage Example", 
-
 		Description: "API alocated 100 GB disk.",
-
 		Size: oneandone.Int2Pointer(100),
-
 	}
 
 	var ss *oneandone.SharedStorage
+	var ss_id string
 
-	ss, err = api.CreateSharedStorage(&ssr)
-
+	ss_id, ss, err = api.CreateSharedStorage(&ssr)
 	if err != nil {
-
 		api.WaitForState(ss, "ACTIVE", 10, 30)
-
 	}
-
-	
 
 	// List shared storages on page 1, 5 results per page and sort by 'name' field.
-
 	// Include only 'name', 'size' and 'minimum_size_allowed' fields in the result.
-
 	var shs []oneandone.SharedStorage
-
 	shs, err = api.ListSharedStorages(1, 5, "name", "", "name,size,minimum_size_allowed")
 
-	
-
 	// List all shared storages that contain 'example' string
-
 	shs, err = api.ListSharedStorages(0, 0, "", "example", "")
 
-	
-
-	// Delete a shared storage
-
-	ss, err = api.DeleteSharedStorage(ss.Id)
-
+	// Delete the shared storage
+	ss, err = api.DeleteSharedStorage(ss_id)
 	if err == nil {
-
 		err = api.WaitUntilDeleted(ss)
-
 	}
 
-	
-
-	// Delete a server
-
+	// Delete the server
 	server, err = api.DeleteServer(server.Id, false)
-
 	if err == nil {
-
 		err = api.WaitUntilDeleted(server)
-
 	}
-
 }
 
 ```
+The next example illustrates how to create a `TYPO3` application server of a fixed size with an initial password and a firewall policy that has just been created.
 
+```Go
+package main
+
+import "github.com/1and1/oneandone-cloudserver-sdk-go"
+
+func main() {
+	token := oneandone.SetToken("bde36026df9d548f699ea97e75a7e87f")
+	client := oneandone.New(token, oneandone.BaseUrl)
+
+	// Create a new firewall policy
+	fpr := oneandone.FirewallPolicyRequest{
+		Name: "HTTPS Traffic Policy",
+		Rules: []oneandone.FirewallPolicyRule{
+			{
+				Protocol: "TCP",
+				PortFrom: oneandone.Int2Pointer(443),
+				PortTo:   oneandone.Int2Pointer(443),
+			},
+		},
+	}
+
+	_, fp, err := client.CreateFirewallPolicy(&fpr)
+	if fp != nil && err == nil {
+		client.WaitForState(fp, "ACTIVE", 5, 60)
+
+		// Look for the TYPO3 application appliance
+		saps, _ := client.ListServerAppliances(0, 0, "", "typo3", "")
+
+		var sa oneandone.ServerAppliance
+		for _, a := range saps {
+			if a.IsAutomaticInstall && a.Type == "APPLICATION" {
+				sa = a
+				break
+			}
+		}
+
+		var fixed_flavours []oneandone.FixedInstanceInfo
+		var fixed_size_id string
+
+		fixed_flavours, err = client.ListFixedInstanceSizes()
+		for _, fl := range fixed_flavours {
+			//look for 'M' size
+			if fl.Name == "VPS_M" {
+				fixed_size_id = fl.Id
+				break
+			}
+		}
+
+		req := oneandone.ServerRequest{
+			Name:        "TYPO3 Server",
+			ApplianceId: sa.Id,
+			PowerOn:     true,
+			Password:    "ucr_kXW8,.2SdMU",
+			Hardware: oneandone.Hardware{
+				FixedInsSizeId: fixed_size_id,
+			},
+			FirewallPolicyId: fp.Id,
+		}
+		_, server, _ := client.CreateServer(&req)
+		if server != nil {
+			client.WaitForState(server, "POWERED_ON", 10, 90)
+		}
+	}
+}
+```
 
 
 ## Index
-
-
 
 ```Go
 
@@ -2075,43 +1721,49 @@ func (api *API) CloneServer(server_id string, new_name string) (*Server, error)
 
 ```Go
 
-func (api *API) CreateFirewallPolicy(fp_data *FirewallPolicyRequest) (*FirewallPolicy, error)
+func (api *API) CreateFirewallPolicy(fp_data *FirewallPolicyRequest) (string, *FirewallPolicy, error)
 
 ```
 
 ```Go
 
-func (api *API) CreateImage(request *ImageConfig) (*Image, error)
+func (api *API) CreateImage(request *ImageConfig) (string, *Image, error)
 
 ```
 
 ```Go
 
-func (api *API) CreateLoadBalancer(lb *LoadBalancer) (*LoadBalancer, error)
+func (api *API) CreateLoadBalancer(lb *LoadBalancer) (string, *LoadBalancer, error)
 
 ```
 
 ```Go
 
-func (api *API) CreateMonitoringPolicy(mp *MonitoringPolicy) (*MonitoringPolicy, error)
+func (api *API) CreateMonitoringPolicy(mp *MonitoringPolicy) (string, *MonitoringPolicy, error)
 
 ```
 
 ```Go
 
-func (api *API) CreatePrivateNetwork(request *PrivateNetworkRequest) (*PrivateNetwork, error)
+func (api *API) CreatePrivateNetwork(request *PrivateNetworkRequest) (string, *PrivateNetwork, error)
 
 ```
 
 ```Go
 
-func (api *API) CreatePublicIp(ip_type string, reverse_dns string) (*PublicIp, error)
+func (api *API) CreatePublicIp(ip_type string, reverse_dns string) (string, *PublicIp, error)
 
 ```
 
 ```Go
 
-func (api *API) CreateServer(request *ServerRequest) (*Server, error)
+func (api *API) CreateServer(request *ServerRequest) (string, *Server, error)
+
+```
+
+```Go
+
+func (api *API) CreateServerEx(request *ServerRequest, timeout int) (string, string, error)
 
 ```
 
@@ -2123,13 +1775,13 @@ func (api *API) CreateServerSnapshot(server_id string) (*Server, error)
 
 ```Go
 
-func (api *API) CreateSharedStorage(request *SharedStorageRequest) (*SharedStorage, error)
+func (api *API) CreateSharedStorage(request *SharedStorageRequest) (string, *SharedStorage, error)
 
 ```
 
 ```Go
 
-func (api *API) CreateUser(user *UserRequest) (*User, error)
+func (api *API) CreateUser(user *UserRequest) (string, *User, error)
 
 ```
 
@@ -2894,6 +2546,4 @@ func SetBaseUrl(newbaseurl string) string
 func SetToken(newtoken string) string
 
 ```
-
-
 
