@@ -447,15 +447,10 @@ func (api *API) GetServerIp(server_id string, ip_id string) (*ServerIp, error) {
 func (api *API) DeleteServerIp(server_id string, ip_id string, keep_ip bool) (*Server, error) {
 	result := new(Server)
 	url := createUrl(api, serverPathSegment, server_id, "ips", ip_id)
-	var err error
-	if keep_ip {
-		req := struct {
-			KeepIp bool `json:"keep_ip"`
-		}{keep_ip}
-		err = api.Client.Delete(url, &req, &result, http.StatusAccepted)
-	} else {
-		err = api.Client.Delete(url, nil, &result, http.StatusAccepted)
-	}
+	qm := make(map[string]interface{}, 1)
+	qm["keep_ip"] = keep_ip
+	url = appendQueryParams(url, qm)
+	err := api.Client.Delete(url, nil, &result, http.StatusAccepted)
 	if err != nil {
 		return nil, err
 	}
