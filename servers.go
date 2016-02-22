@@ -3,6 +3,7 @@ package oneandone
 import (
 	"encoding/json"
 	"errors"
+	"math/big"
 	"net/http"
 )
 
@@ -293,9 +294,30 @@ func (api *API) GetServerHardware(server_id string) (*Hardware, error) {
 
 // PUT /servers/{server_id}/hardware
 func (api *API) UpdateServerHardware(server_id string, hardware *Hardware) (*Server, error) {
+	var vc, cpp *int
+	var ram *float32
+	if hardware.Vcores > 0 {
+		vc = new(int)
+		*vc = hardware.Vcores
+	}
+	if hardware.CoresPerProcessor > 0 {
+		cpp = new(int)
+		*cpp = hardware.CoresPerProcessor
+	}
+	if big.NewFloat(float64(hardware.Ram)).Cmp(big.NewFloat(0)) != 0 {
+		ram = new(float32)
+		*ram = hardware.Ram
+	}
+	req := struct {
+		VCores *int     `json:"vcore,omitempty"`
+		Cpp    *int     `json:"cores_per_processor,omitempty"`
+		Ram    *float32 `json:"ram,omitempty"`
+		Flavor string   `json:"fixed_instance_size_id,omitempty"`
+	}{VCores: vc, Cpp: cpp, Ram: ram, Flavor: hardware.FixedInsSizeId}
+
 	result := new(Server)
 	url := createUrl(api, serverPathSegment, server_id, "hardware")
-	err := api.Client.Put(url, &hardware, &result, http.StatusAccepted)
+	err := api.Client.Put(url, &req, &result, http.StatusAccepted)
 	if err != nil {
 		return nil, err
 	}
@@ -447,15 +469,10 @@ func (api *API) GetServerIp(server_id string, ip_id string) (*ServerIp, error) {
 func (api *API) DeleteServerIp(server_id string, ip_id string, keep_ip bool) (*Server, error) {
 	result := new(Server)
 	url := createUrl(api, serverPathSegment, server_id, "ips", ip_id)
-	var err error
-	if keep_ip {
-		req := struct {
-			KeepIp bool `json:"keep_ip"`
-		}{keep_ip}
-		err = api.Client.Delete(url, &req, &result, http.StatusAccepted)
-	} else {
-		err = api.Client.Delete(url, nil, &result, http.StatusAccepted)
-	}
+	qm := make(map[string]interface{}, 1)
+	qm["keep_ip"] = keep_ip
+	url = appendQueryParams(url, qm)
+	err := api.Client.Delete(url, nil, &result, http.StatusAccepted)
 	if err != nil {
 		return nil, err
 	}
