@@ -9,6 +9,7 @@ type FirewallPolicy struct {
 	descField
 	DefaultPolicy uint8                `json:"default"`
 	CloudpanelId  string               `json:"cloudpanel_id,omitempty"`
+	CreationDate  string               `json:"creation_date,omitempty"`
 	State         string               `json:"state,omitempty"`
 	Rules         []FirewallPolicyRule `json:"rules,omitempty"`
 	ServerIps     []ServerIpInfo       `json:"server_ips,omitempty"`
