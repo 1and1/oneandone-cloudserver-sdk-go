@@ -7,20 +7,24 @@ import (
 type Image struct {
 	idField
 	ImageConfig
-	MinHddSize     int      `json:"min_hdd_size"`
-	Architecture   int      `json:"architecture"`
-	CloudPanelId   string   `json:"cloudpanel_id,omitempty"`
-	CreationDate   string   `json:"creation_date,omitempty"`
-	State          string   `json:"state,omitempty"`
-	OsImageType    string   `json:"os_image_type,omitempty"`
-	OsFamily       string   `json:"os_family,omitempty"`
-	Os             string   `json:"os,omitempty"`
-	OsVersion      string   `json:"os_version,omitempty"`
-	Type           string   `json:"type,omitempty"`
-	AvailableSites []string `json:"available_sites,omitempty"`
-	Licenses       []string `json:"licenses,omitempty"`
-	Hdds           []Hdd    `json:"hdds,omitempty"`
+	MinHddSize     int       `json:"min_hdd_size"`
+	Architecture   int       `json:"architecture"`
+	CloudPanelId   string    `json:"cloudpanel_id,omitempty"`
+	CreationDate   string    `json:"creation_date,omitempty"`
+	State          string    `json:"state,omitempty"`
+	OsImageType    string    `json:"os_image_type,omitempty"`
+	OsFamily       string    `json:"os_family,omitempty"`
+	Os             string    `json:"os,omitempty"`
+	OsVersion      string    `json:"os_version,omitempty"`
+	Type           string    `json:"type,omitempty"`
+	AvailableSites []string  `json:"available_sites,omitempty"`
+	Licenses       []license `json:"licenses,omitempty"`
+	Hdds           []Hdd     `json:"hdds,omitempty"`
 	ApiPtr
+}
+
+type license struct {
+	nameField
 }
 
 type ImageConfig struct {
