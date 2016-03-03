@@ -18,13 +18,9 @@ type Image struct {
 	OsVersion      string    `json:"os_version,omitempty"`
 	Type           string    `json:"type,omitempty"`
 	AvailableSites []string  `json:"available_sites,omitempty"`
-	Licenses       []license `json:"licenses,omitempty"`
+	Licenses       []License `json:"licenses,omitempty"`
 	Hdds           []Hdd     `json:"hdds,omitempty"`
 	ApiPtr
-}
-
-type license struct {
-	nameField
 }
 
 type ImageConfig struct {

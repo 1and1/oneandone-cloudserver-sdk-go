@@ -73,10 +73,10 @@ func TestGetServerAppliance(t *testing.T) {
 	if sa == nil || err != nil {
 		t.Errorf("GetServerAppliance failed. Error: " + err.Error())
 	}
-	//	if sa.Id != saps[0].Id {
-	//		t.Errorf("Wrong ID of the server appliance.")
-	//	}
-	//	if sa.Name != saps[0].Name {
-	//		t.Errorf("Wrong name of the server appliance.")
-	//	}
+	if sa.Id != saps[0].Id {
+		t.Errorf("Wrong ID of the server appliance.")
+	}
+	if sa.Name != saps[0].Name {
+		t.Errorf("Wrong name of the server appliance.")
+	}
 }
