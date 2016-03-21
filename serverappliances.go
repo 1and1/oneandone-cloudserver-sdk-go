@@ -5,15 +5,15 @@ import "net/http"
 type ServerAppliance struct {
 	Identity
 	typeField
-	OsImageType        string   `json:"os_image_type,omitempty"`
-	OsFamily           string   `json:"os_family,omitempty"`
-	Os                 string   `json:"os,omitempty"`
-	OsVersion          string   `json:"os_version,omitempty"`
-	MinHddSize         int      `json:"min_hdd_size"`
-	Architecture       int      `json:"architecture"`
-	Licenses           []string `json:"licenses,omitempty"`
-	IsAutomaticInstall bool     `json:"automatic_installation"`
-	AvailableSites     []string `json:"available_sites,omitempty"`
+	OsImageType        string      `json:"os_image_type,omitempty"`
+	OsFamily           string      `json:"os_family,omitempty"`
+	Os                 string      `json:"os,omitempty"`
+	OsVersion          string      `json:"os_version,omitempty"`
+	MinHddSize         int         `json:"min_hdd_size"`
+	Architecture       interface{} `json:"architecture"`
+	Licenses           []License   `json:"licenses,omitempty"`
+	IsAutomaticInstall bool        `json:"automatic_installation"`
+	AvailableSites     []string    `json:"available_sites,omitempty"`
 	ApiPtr
 }
 
@@ -35,9 +35,8 @@ func (api *API) ListServerAppliances(args ...interface{}) ([]ServerAppliance, er
 }
 
 // GET /server_appliances/{id}
-func (api *API) GetServerAppliance(sa_id string) (interface{}, error) {
-	//	res := new(ServerAppliance)
-	var res interface{}
+func (api *API) GetServerAppliance(sa_id string) (*ServerAppliance, error) {
+	res := new(ServerAppliance)
 	url := createUrl(api, serverAppliancePathSegment, sa_id)
 	err := api.Client.Get(url, &res, http.StatusOK)
 	if err != nil {
