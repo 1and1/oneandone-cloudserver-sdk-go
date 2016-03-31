@@ -54,6 +54,7 @@ type ApiInstance interface {
 }
 
 const (
+	datacenterPathSegment      = "datacenters"
 	dvdIsoPathSegment          = "dvd_isos"
 	firewallPolicyPathSegment  = "firewall_policies"
 	imagePathSegment           = "images"
