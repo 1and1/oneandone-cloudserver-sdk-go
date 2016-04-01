@@ -14,6 +14,7 @@ type Server struct {
 	CloudPanelId  string           `json:"cloudpanel_id,omitempty"`
 	CreationDate  string           `json:"creation_date,omitempty"`
 	FirstPassword string           `json:"first_password,omitempty"`
+	Datacenter    *Datacenter      `json:"datacenter,omitempty"`
 	Status        *Status          `json:"status,omitempty"`
 	Hardware      *Hardware        `json:"hardware,omitempty"`
 	Image         *Identity        `json:"image,omitempty"`
@@ -106,7 +107,8 @@ type ServerRequest struct {
 	IpId               string   `json:"ip_id,omitempty"`
 	LoadBalancerId     string   `json:"load_balancer_id,omitempty"`
 	MonitoringPolicyId string   `json:"monitoring_policy_id,omitempty"`
-	RegionId           string   `json:"region_id,omitempty"`
+	DatacenterId       string   `json:"datacenter_id,omitempty"`
+	SSHKey             string   `json:"rsa_key,omitempty"`
 }
 
 type ServerAction struct {
@@ -158,7 +160,8 @@ func (api *API) CreateServer(request *ServerRequest) (string, *Server, error) {
 	insert2map(req, "ip_id", request.IpId)
 	insert2map(req, "load_balancer_id", request.LoadBalancerId)
 	insert2map(req, "monitoring_policy_id", request.MonitoringPolicyId)
-	insert2map(req, "region_id", request.RegionId)
+	insert2map(req, "datacenter_id", request.DatacenterId)
+	insert2map(req, "rsa_key", request.SSHKey)
 	req["hardware"] = hw
 	if request.Hardware.FixedInsSizeId != "" {
 		hw["fixed_instance_size_id"] = request.Hardware.FixedInsSizeId
