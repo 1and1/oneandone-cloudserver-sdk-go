@@ -22,3 +22,15 @@ func (api *API) ListDatacenters(args ...interface{}) ([]Datacenter, error) {
 
 	return result, nil
 }
+
+// GET /datacenters/{datacenter_id}
+func (api *API) GetDatacenter(dc_id string) (*Datacenter, error) {
+	result := new(Datacenter)
+	url := createUrl(api, datacenterPathSegment, dc_id)
+	err := api.Client.Get(url, &result, http.StatusOK)
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
+}

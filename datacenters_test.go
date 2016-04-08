@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 	"testing"
+	"time"
 )
 
 // /datacenters tests
@@ -58,6 +59,35 @@ func TestListDatacenters(t *testing.T) {
 	for _, dc := range res {
 		if !strings.Contains(dc.Location, "Germany") {
 			t.Errorf("Search parameter failed.")
+		}
+	}
+}
+
+func TestGetDatacenter(t *testing.T) {
+	dcs, err := api.ListDatacenters()
+
+	if len(dcs) == 0 {
+		t.Errorf("No datacenter found. " + err.Error())
+		return
+	}
+
+	for i, _ := range dcs {
+		time.Sleep(time.Second)
+		fmt.Printf("Getting datacenter '%s'...\n", dcs[i].CountryCode)
+		dc, err := api.GetDatacenter(dcs[i].Id)
+
+		if err != nil {
+			t.Errorf("GetDatacenter failed. Error: " + err.Error())
+			return
+		}
+		if dc.Id != dcs[i].Id {
+			t.Errorf("Wrong datacenter ID.")
+		}
+		if dc.CountryCode != dcs[i].CountryCode {
+			t.Errorf("Wrong country code of the datacenter.")
+		}
+		if dc.Location != dcs[i].Location {
+			t.Errorf("Wrong datacenter location.")
 		}
 	}
 }
