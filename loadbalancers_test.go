@@ -27,14 +27,14 @@ func create_load_balancer() *LoadBalancer {
 	rint := rand.Intn(999)
 	test_lb_name = fmt.Sprintf("LoadBalancer_%d", rint)
 	test_lb_desc = fmt.Sprintf("LoadBalancer_%d description", rint)
-	req := LoadBalancer{
+	req := LoadBalancerRequest{
 		Name:                test_lb_name,
 		Description:         test_lb_desc,
 		Method:              lb_round_robin,
-		Persistence:         true,
-		PersistenceTime:     60,
+		Persistence:         Bool2Pointer(true),
+		PersistenceTime:     Int2Pointer(60),
 		HealthCheckTest:     "TCP",
-		HealthCheckInterval: 300,
+		HealthCheckInterval: Int2Pointer(300),
 		Rules: []LoadBalancerRule{
 			{
 				Protocol:     "TCP",
@@ -365,7 +365,7 @@ func TestUpdateLoadBalancer(t *testing.T) {
 	fmt.Printf("Updating load balancer '%s'...\n", test_lb.Name)
 	new_name := test_lb.Name + "_updated"
 	new_desc := test_lb.Description + "_updated"
-	lbu := LoadBalancerUpdate{
+	lbu := LoadBalancerRequest{
 		Name:        new_name,
 		Description: new_desc,
 		Method:      lb_least_con,
