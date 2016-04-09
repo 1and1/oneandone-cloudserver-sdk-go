@@ -17,6 +17,7 @@ type SharedStorage struct {
 	NfsPath        string                `json:"nfs_path,omitempty"`
 	CreationDate   string                `json:"creation_date,omitempty"`
 	Servers        []SharedStorageServer `json:"servers,omitempty"`
+	Datacenter     *Datacenter           `json:"datacenter,omitempty"`
 	ApiPtr
 }
 
@@ -27,9 +28,10 @@ type SharedStorageServer struct {
 }
 
 type SharedStorageRequest struct {
-	Name        string `json:"name,omitempty"`
-	Description string `json:"description,omitempty"`
-	Size        *int   `json:"size"`
+	DatacenterId string `json:"datacenter_id,omitempty"`
+	Name         string `json:"name,omitempty"`
+	Description  string `json:"description,omitempty"`
+	Size         *int   `json:"size"`
 }
 
 type SharedStorageAccess struct {
