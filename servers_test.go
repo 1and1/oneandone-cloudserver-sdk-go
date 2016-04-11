@@ -71,12 +71,22 @@ func setup_server() {
 	server = srv
 }
 
+func get_random_datacenterID() string {
+	rand.Seed(time.Now().UnixNano())
+	dcs, _ := api.ListDatacenters()
+	if len(dcs) > 0 {
+		i := rand.Intn(len(dcs))
+		return dcs[i].Id
+	}
+	return ""
+}
+
 func get_random_appliance(max_disk_size int) ServerAppliance {
 	rand.Seed(time.Now().UnixNano())
 	saps, _ := api.ListServerAppliances()
 	for {
 		i := rand.Intn(len(saps))
-		if saps[i].IsAutomaticInstall && saps[i].MinHddSize <= max_disk_size && saps[i].Type == "INTERNAL" {
+		if saps[i].MinHddSize <= max_disk_size && saps[i].Type == "INTERNAL" || saps[i].Type == "APPLICATION" {
 			return saps[i]
 		}
 	}
@@ -170,7 +180,7 @@ func TestCreateServerEx(t *testing.T) {
 	var size_s FixedInstanceInfo
 	fixed_flavours, _ := api.ListFixedInstanceSizes()
 	for _, fl := range fixed_flavours {
-		if fl.Name == "VPS_S" {
+		if fl.Name == "S" {
 			size_s = fl
 			break
 		}
@@ -178,8 +188,9 @@ func TestCreateServerEx(t *testing.T) {
 	sap := get_random_appliance(size_s.Hardware.Hdds[0].Size)
 
 	req := ServerRequest{
-		Name:        "Random S Server",
-		ApplianceId: sap.Id,
+		DatacenterId: get_random_datacenterID(),
+		Name:         "Random S Server",
+		ApplianceId:  sap.Id,
 		Hardware: Hardware{
 			FixedInsSizeId: size_s.Id,
 		},
