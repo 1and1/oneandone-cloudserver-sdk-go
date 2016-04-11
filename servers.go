@@ -768,8 +768,11 @@ func (api *API) DeleteServerSnapshot(server_id string, snapshot_id string) (*Ser
 }
 
 // POST /servers/{server_id}/clone
-func (api *API) CloneServer(server_id string, new_name string) (*Server, error) {
-	data := nameField{new_name}
+func (api *API) CloneServer(server_id string, new_name string, datacenter_id string) (*Server, error) {
+	data := struct {
+		Name         string `json:"name"`
+		DatacenterId string `json:"datacenter_id,omitempty"`
+	}{Name: new_name, DatacenterId: datacenter_id}
 	result := new(Server)
 	url := createUrl(api, serverPathSegment, server_id, "clone")
 	err := api.Client.Post(url, &data, &result, http.StatusAccepted)

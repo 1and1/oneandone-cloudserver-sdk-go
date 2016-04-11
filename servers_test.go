@@ -1128,7 +1128,11 @@ func TestCloneServer(t *testing.T) {
 
 	fmt.Println("Cloning the server...")
 	new_name := server_name + "_Copy"
-	srv, err := api.CloneServer(server_id, new_name)
+	var dc_id string
+	if server != nil && server.Datacenter != nil {
+		dc_id = server.Datacenter.Id
+	}
+	srv, err := api.CloneServer(server_id, new_name, dc_id)
 
 	if err != nil {
 		t.Errorf("CloneServer failed. Error: " + err.Error())
