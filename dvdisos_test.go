@@ -59,7 +59,7 @@ func TestListDvdIsos(t *testing.T) {
 	}
 
 	for _, dvd := range res {
-		if !strings.Contains(strings.ToLower(dvd.OsVersion), "freebsd") {
+		if !strings.Contains(strings.ToLower(dvd.Name), "freebsd") {
 			t.Errorf("Search parameter failed.")
 		}
 	}
@@ -75,8 +75,5 @@ func TestGetDvdIso(t *testing.T) {
 	}
 	if dvd.Id != dvds[0].Id {
 		t.Errorf("Wrong ID of the dvd iso.")
-	}
-	if dvd.Name != dvds[0].Name {
-		t.Errorf("Wrong name of the dvd iso.")
 	}
 }
