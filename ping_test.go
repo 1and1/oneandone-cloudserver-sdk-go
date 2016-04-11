@@ -25,16 +25,16 @@ func TestPing(t *testing.T) {
 }
 
 func TestPingAuth(t *testing.T) {
-	fmt.Println("PING with authentication...")
+	fmt.Println("PING with authorization check...")
 	pong, err := api.PingAuth()
 	if err != nil {
-		t.Errorf("Ping with authentication failed. Error: " + err.Error())
+		t.Errorf("Ping with authorization check failed. Error: " + err.Error())
 	}
 	if len(pong) == 0 {
-		t.Errorf("Empty PING authentication response.")
+		t.Errorf("Empty PING authorization response.")
 		return
 	}
 	if pong[0] != "PONG" {
-		t.Errorf("Invalid PING authentication response.")
+		t.Errorf("Invalid PING authorization response.")
 	}
 }
