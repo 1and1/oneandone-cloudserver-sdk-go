@@ -62,6 +62,8 @@ const (
 	logPathSegment             = "logs"
 	monitorCenterPathSegment   = "monitoring_center"
 	monitorPolicyPathSegment   = "monitoring_policies"
+	pingPathSegment            = "ping"
+	pingAuthPathSegment        = "ping_auth"
 	privateNetworkPathSegment  = "private_networks"
 	publicIpPathSegment        = "public_ips"
 	serverPathSegment          = "servers"
