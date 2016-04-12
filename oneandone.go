@@ -64,6 +64,7 @@ const (
 	monitorPolicyPathSegment   = "monitoring_policies"
 	pingPathSegment            = "ping"
 	pingAuthPathSegment        = "ping_auth"
+	pricingPathSegment         = "pricing"
 	privateNetworkPathSegment  = "private_networks"
 	publicIpPathSegment        = "public_ips"
 	serverPathSegment          = "servers"
