@@ -72,6 +72,7 @@ const (
 	sharedStoragePathSegment   = "shared_storages"
 	usagePathSegment           = "usages"
 	userPathSegment            = "users"
+	vpnPathSegment             = "vpns"
 )
 
 // Struct to hold the status of an API object.
