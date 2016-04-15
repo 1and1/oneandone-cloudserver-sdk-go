@@ -96,6 +96,9 @@ func Cleanup() {
 	if image_serv != nil {
 		api.DeleteServer(image_serv.Id, false)
 	}
+	if test_vpn != nil {
+		api.DeleteVPN(test_vpn.Id)
+	}
 }
 
 func TestMain(m *testing.M) {
