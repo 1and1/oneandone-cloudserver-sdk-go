@@ -101,7 +101,7 @@ func TestGetImage(t *testing.T) {
 	if img.Type != test_image.Type {
 		t.Errorf("Wrong image type.")
 	}
-	if img.Architecture != test_image.Architecture {
+	if *img.Architecture != *test_image.Architecture {
 		t.Errorf("Wrong image architecture.")
 	}
 	if img.Description != test_image.Description {
