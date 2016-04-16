@@ -46,13 +46,13 @@ func create_image(ser_id string) *Image {
 		fmt.Printf("Unable to create image '%s'.", image_name)
 		return nil
 	}
-	api.WaitForState(img, "ACTIVE", 10, 60)
+	api.WaitForState(img, "ENABLED", 10, 90)
 	return img
 }
 
 func setup_image() {
 	_, image_serv, _ = create_test_server(true)
-	api.WaitForState(image_serv, "POWERED_ON", 10, 70)
+	api.WaitForState(image_serv, "POWERED_ON", 10, 180)
 	test_image = create_image(image_serv.Id)
 }
 

@@ -86,7 +86,7 @@ func get_random_appliance(max_disk_size int) ServerAppliance {
 	saps, _ := api.ListServerAppliances()
 	for {
 		i := rand.Intn(len(saps))
-		if saps[i].MinHddSize <= max_disk_size && saps[i].Type == "INTERNAL" || saps[i].Type == "APPLICATION" {
+		if saps[i].MinHddSize <= max_disk_size && saps[i].Type == "INTERNAL" {
 			return saps[i]
 		}
 	}
@@ -594,7 +594,7 @@ func TestAddServerHdds(t *testing.T) {
 		return
 	}
 
-	srv = wait_for_action_done(srv, 10, 30)
+	srv = wait_for_action_done(srv, 10, 120)
 
 	if len(srv.Hardware.Hdds) != 2 {
 		t.Errorf("Wrong number of hard disks.")
