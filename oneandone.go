@@ -67,6 +67,7 @@ const (
 	pricingPathSegment         = "pricing"
 	privateNetworkPathSegment  = "private_networks"
 	publicIpPathSegment        = "public_ips"
+	rolePathSegment            = "roles"
 	serverPathSegment          = "servers"
 	serverAppliancePathSegment = "server_appliances"
 	sharedStoragePathSegment   = "shared_storages"
