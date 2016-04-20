@@ -99,6 +99,9 @@ func Cleanup() {
 	if test_vpn != nil {
 		api.DeleteVPN(test_vpn.Id)
 	}
+	if test_role != nil {
+		api.DeleteRole(test_role.Id)
+	}
 }
 
 func TestMain(m *testing.M) {
