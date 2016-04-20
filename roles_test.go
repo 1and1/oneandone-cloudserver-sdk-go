@@ -163,7 +163,7 @@ func TestGetRolePermissions(t *testing.T) {
 		p.IPs == nil || p.LoadBalancers == nil || p.Logs == nil || p.MonitorCenter == nil ||
 		p.MonitorPolicies == nil || p.PrivateNetworks == nil || p.Roles == nil || p.Servers == nil ||
 		p.SharedStorage == nil || p.Usages == nil || p.Users == nil || p.VPNs == nil {
-		t.Errorf("The role '' is missimg some permissions objects.", test_role.Name)
+		t.Errorf("The role '%s' is missimg some permissions objects.", test_role.Name)
 	}
 }
 
