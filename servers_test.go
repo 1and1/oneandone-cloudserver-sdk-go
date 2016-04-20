@@ -626,7 +626,7 @@ func TestDeleteServerHdd(t *testing.T) {
 		t.Errorf("DeleteServerHdd failed. Error: " + err.Error())
 		return
 	}
-	srv = wait_for_action_done(srv, 10, 30)
+	srv = wait_for_action_done(srv, 10, 90)
 	if len(srv.Hardware.Hdds) != 1 {
 		t.Errorf("Wrong number of the server's hard disks. The HDD was not deleted.")
 	}
@@ -668,7 +668,7 @@ func TestReinstallServerImage(t *testing.T) {
 	if err != nil {
 		t.Errorf("ReinstallServerImage failed. Error: " + err.Error())
 	} else {
-		err = api.WaitForState(srv, "POWERED_ON", 30, 60)
+		err = api.WaitForState(srv, "POWERED_ON", 30, 120)
 		if err != nil {
 			t.Errorf("ReinstallServerImage failed. Error: " + err.Error())
 		}
@@ -726,7 +726,7 @@ func TestUpdateServerHardware(t *testing.T) {
 	if err != nil {
 		t.Errorf("UpdateServersHardware failed. Error: " + err.Error())
 	} else {
-		srv = wait_for_action_done(srv, 10, 60)
+		srv = wait_for_action_done(srv, 10, 90)
 		if srv.Hardware.Vcores != hw.Vcores {
 			t.Errorf("Wrong number of processor cores. Expected: %d ; Found: %d", hw.Vcores, srv.Hardware.Vcores)
 		}
