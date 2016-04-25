@@ -71,12 +71,22 @@ func setup_server() {
 	server = srv
 }
 
+func get_random_datacenterID() string {
+	rand.Seed(time.Now().UnixNano())
+	dcs, _ := api.ListDatacenters()
+	if len(dcs) > 0 {
+		i := rand.Intn(len(dcs))
+		return dcs[i].Id
+	}
+	return ""
+}
+
 func get_random_appliance(max_disk_size int) ServerAppliance {
 	rand.Seed(time.Now().UnixNano())
 	saps, _ := api.ListServerAppliances()
 	for {
 		i := rand.Intn(len(saps))
-		if saps[i].IsAutomaticInstall && saps[i].MinHddSize <= max_disk_size && saps[i].Type == "INTERNAL" {
+		if saps[i].MinHddSize <= max_disk_size && saps[i].Type == "INTERNAL" {
 			return saps[i]
 		}
 	}
@@ -170,7 +180,7 @@ func TestCreateServerEx(t *testing.T) {
 	var size_s FixedInstanceInfo
 	fixed_flavours, _ := api.ListFixedInstanceSizes()
 	for _, fl := range fixed_flavours {
-		if fl.Name == "VPS_S" {
+		if fl.Name == "S" {
 			size_s = fl
 			break
 		}
@@ -178,8 +188,9 @@ func TestCreateServerEx(t *testing.T) {
 	sap := get_random_appliance(size_s.Hardware.Hdds[0].Size)
 
 	req := ServerRequest{
-		Name:        "Random S Server",
-		ApplianceId: sap.Id,
+		DatacenterId: get_random_datacenterID(),
+		Name:         "Random S Server",
+		ApplianceId:  sap.Id,
 		Hardware: Hardware{
 			FixedInsSizeId: size_s.Id,
 		},
@@ -583,7 +594,7 @@ func TestAddServerHdds(t *testing.T) {
 		return
 	}
 
-	srv = wait_for_action_done(srv, 10, 30)
+	srv = wait_for_action_done(srv, 10, 120)
 
 	if len(srv.Hardware.Hdds) != 2 {
 		t.Errorf("Wrong number of hard disks.")
@@ -615,7 +626,7 @@ func TestDeleteServerHdd(t *testing.T) {
 		t.Errorf("DeleteServerHdd failed. Error: " + err.Error())
 		return
 	}
-	srv = wait_for_action_done(srv, 10, 30)
+	srv = wait_for_action_done(srv, 10, 90)
 	if len(srv.Hardware.Hdds) != 1 {
 		t.Errorf("Wrong number of the server's hard disks. The HDD was not deleted.")
 	}
@@ -657,7 +668,7 @@ func TestReinstallServerImage(t *testing.T) {
 	if err != nil {
 		t.Errorf("ReinstallServerImage failed. Error: " + err.Error())
 	} else {
-		err = api.WaitForState(srv, "POWERED_ON", 30, 60)
+		err = api.WaitForState(srv, "POWERED_ON", 30, 120)
 		if err != nil {
 			t.Errorf("ReinstallServerImage failed. Error: " + err.Error())
 		}
@@ -715,7 +726,7 @@ func TestUpdateServerHardware(t *testing.T) {
 	if err != nil {
 		t.Errorf("UpdateServersHardware failed. Error: " + err.Error())
 	} else {
-		srv = wait_for_action_done(srv, 10, 60)
+		srv = wait_for_action_done(srv, 10, 90)
 		if srv.Hardware.Vcores != hw.Vcores {
 			t.Errorf("Wrong number of processor cores. Expected: %d ; Found: %d", hw.Vcores, srv.Hardware.Vcores)
 		}
@@ -1128,7 +1139,11 @@ func TestCloneServer(t *testing.T) {
 
 	fmt.Println("Cloning the server...")
 	new_name := server_name + "_Copy"
-	srv, err := api.CloneServer(server_id, new_name)
+	var dc_id string
+	if server != nil && server.Datacenter != nil {
+		dc_id = server.Datacenter.Id
+	}
+	srv, err := api.CloneServer(server_id, new_name, dc_id)
 
 	if err != nil {
 		t.Errorf("CloneServer failed. Error: " + err.Error())

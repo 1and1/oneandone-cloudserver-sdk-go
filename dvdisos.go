@@ -9,12 +9,12 @@ import "net/http"
 //
 type DvdIso struct {
 	Identity
-	OsFamily       string      `json:"os_family,omitempty"`
-	Os             string      `json:"os,omitempty"`
-	OsVersion      string      `json:"os_version,omitempty"`
-	Type           string      `json:"type,omitempty"`
-	AvailableSites []string    `json:"available_sites,omitempty"`
-	Architecture   interface{} `json:"architecture"`
+	OsFamily             string      `json:"os_family,omitempty"`
+	Os                   string      `json:"os,omitempty"`
+	OsVersion            string      `json:"os_version,omitempty"`
+	Type                 string      `json:"type,omitempty"`
+	AvailableDatacenters []string    `json:"available_datacenters,omitempty"`
+	Architecture         interface{} `json:"os_architecture,omitempty"`
 	ApiPtr
 }
 

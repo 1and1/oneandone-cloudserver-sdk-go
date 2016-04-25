@@ -179,6 +179,24 @@ func TestGetUser(t *testing.T) {
 	}
 }
 
+func TestGetCurrentUserPermissions(t *testing.T) {
+	getc_user.Do(get_current_user)
+
+	fmt.Printf("Getting current user permissions ...\n")
+	p, err := api.GetCurrentUserPermissions()
+
+	if err != nil {
+		t.Errorf("GetCurrentUserPermissions failed. Error: " + err.Error())
+	} else {
+		if p == nil || p.Backups == nil || p.Firewalls == nil || p.Images == nil || p.Invoice == nil ||
+			p.IPs == nil || p.LoadBalancers == nil || p.Logs == nil || p.MonitorCenter == nil ||
+			p.MonitorPolicies == nil || p.PrivateNetworks == nil || p.Roles == nil || p.Servers == nil ||
+			p.SharedStorage == nil || p.Usages == nil || p.Users == nil || p.VPNs == nil {
+			t.Errorf("Some permissions objects are missing.")
+		}
+	}
+}
+
 func TestGetUserApi(t *testing.T) {
 	getc_user.Do(get_current_user)
 

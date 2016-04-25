@@ -62,13 +62,18 @@ const (
 	logPathSegment             = "logs"
 	monitorCenterPathSegment   = "monitoring_center"
 	monitorPolicyPathSegment   = "monitoring_policies"
+	pingPathSegment            = "ping"
+	pingAuthPathSegment        = "ping_auth"
+	pricingPathSegment         = "pricing"
 	privateNetworkPathSegment  = "private_networks"
 	publicIpPathSegment        = "public_ips"
+	rolePathSegment            = "roles"
 	serverPathSegment          = "servers"
 	serverAppliancePathSegment = "server_appliances"
 	sharedStoragePathSegment   = "shared_storages"
 	usagePathSegment           = "usages"
 	userPathSegment            = "users"
+	vpnPathSegment             = "vpns"
 )
 
 // Struct to hold the status of an API object.

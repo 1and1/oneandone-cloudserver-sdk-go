@@ -7,19 +7,21 @@ import (
 type PrivateNetwork struct {
 	Identity
 	descField
-	CloudpanelId   string     `json:"cloudpanel_id,omitempty"`
-	NetworkAddress string     `json:"network_address,omitempty"`
-	SubnetMask     string     `json:"subnet_mask,omitempty"`
-	State          string     `json:"state,omitempty"`
-	SiteId         string     `json:"site_id,omitempty"`
-	CreationDate   string     `json:"creation_date,omitempty"`
-	Servers        []Identity `json:"servers,omitempty"`
+	CloudpanelId   string      `json:"cloudpanel_id,omitempty"`
+	NetworkAddress string      `json:"network_address,omitempty"`
+	SubnetMask     string      `json:"subnet_mask,omitempty"`
+	State          string      `json:"state,omitempty"`
+	SiteId         string      `json:"site_id,omitempty"`
+	CreationDate   string      `json:"creation_date,omitempty"`
+	Servers        []Identity  `json:"servers,omitempty"`
+	Datacenter     *Datacenter `json:"datacenter,omitempty"`
 	ApiPtr
 }
 
 type PrivateNetworkRequest struct {
 	Name           string `json:"name,omitempty"`
 	Description    string `json:"description,omitempty"`
+	DatacenterId   string `json:"datacenter_id,omitempty"`
 	NetworkAddress string `json:"network_address,omitempty"`
 	SubnetMask     string `json:"subnet_mask,omitempty"`
 }

@@ -12,6 +12,7 @@ type PublicIp struct {
 	State        string      `json:"state,omitempty"`
 	SiteId       string      `json:"site_id,omitempty"`
 	CreationDate string      `json:"creation_date,omitempty"`
+	Datacenter   *Datacenter `json:"datacenter,omitempty"`
 	ApiPtr
 }
 
@@ -43,13 +44,14 @@ func (api *API) ListPublicIps(args ...interface{}) ([]PublicIp, error) {
 }
 
 // POST /public_ips
-func (api *API) CreatePublicIp(ip_type string, reverse_dns string) (string, *PublicIp, error) {
+func (api *API) CreatePublicIp(ip_type string, reverse_dns string, datacenter_id string) (string, *PublicIp, error) {
 	res := new(PublicIp)
 	url := createUrl(api, publicIpPathSegment)
 	req := struct {
-		ReverseDns string `json:"reverse_dns,omitempty"`
-		Type       string `json:"type,omitempty"`
-	}{ReverseDns: reverse_dns, Type: ip_type}
+		DatacenterId string `json:"datacenter_id,omitempty"`
+		ReverseDns   string `json:"reverse_dns,omitempty"`
+		Type         string `json:"type,omitempty"`
+	}{DatacenterId: datacenter_id, ReverseDns: reverse_dns, Type: ip_type}
 	err := api.Client.Post(url, &req, &res, http.StatusCreated)
 	if err != nil {
 		return "", nil, err

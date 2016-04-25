@@ -185,6 +185,17 @@ func (api *API) RemoveUserApiAllowedIp(user_id string, ip string) (*User, error)
 	return result, nil
 }
 
+// GET /users/{id}/api/ips
+func (api *API) GetCurrentUserPermissions() (*Permissions, error) {
+	result := new(Permissions)
+	url := createUrl(api, userPathSegment, "current_user_permissions")
+	err := api.Client.Get(url, &result, http.StatusOK)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
 func (u *User) GetState() (string, error) {
 	in, err := u.api.GetUser(u.Id)
 	if in == nil {

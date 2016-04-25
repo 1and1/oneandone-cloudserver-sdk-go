@@ -56,9 +56,9 @@ func printObject(in interface{}) {
 func deploy_test_server(power_on bool) {
 	_, test_server, _ = create_test_server(power_on)
 	if power_on {
-		api.WaitForState(test_server, "POWERED_ON", 10, 70)
+		api.WaitForState(test_server, "POWERED_ON", 10, 90)
 	} else {
-		api.WaitForState(test_server, "POWERED_OFF", 10, 60)
+		api.WaitForState(test_server, "POWERED_OFF", 10, 90)
 	}
 }
 
@@ -95,6 +95,12 @@ func Cleanup() {
 	}
 	if image_serv != nil {
 		api.DeleteServer(image_serv.Id, false)
+	}
+	if test_vpn != nil {
+		api.DeleteVPN(test_vpn.Id)
+	}
+	if test_role != nil {
+		api.DeleteRole(test_role.Id)
 	}
 }
 

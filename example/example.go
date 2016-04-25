@@ -22,7 +22,7 @@ func main() {
 
 	var sa oneandone.ServerAppliance
 	for _, a := range saps {
-		if a.IsAutomaticInstall && a.Type == "INTERNAL" {
+		if a.Type == "INTERNAL" {
 			sa = a
 		}
 	}
@@ -58,14 +58,14 @@ func main() {
 	//	time.Sleep(time.Second * 10)
 
 	// Create a load balancer
-	lbr := oneandone.LoadBalancer{
+	lbr := oneandone.LoadBalancerRequest{
 		Name:                "Load Balancer Example",
 		Description:         "API created load balancer.",
 		Method:              "ROUND_ROBIN",
-		Persistence:         true,
-		PersistenceTime:     1200,
+		Persistence:         oneandone.Bool2Pointer(true),
+		PersistenceTime:     oneandone.Int2Pointer(1200),
 		HealthCheckTest:     "TCP",
-		HealthCheckInterval: 40,
+		HealthCheckInterval: oneandone.Int2Pointer(40),
 		Rules: []oneandone.LoadBalancerRule{
 			{
 				Protocol:     "TCP",
@@ -240,7 +240,7 @@ func main() {
 
 		var sa oneandone.ServerAppliance
 		for _, a := range saps {
-			if a.IsAutomaticInstall && a.Type == "APPLICATION" {
+			if a.Type == "APPLICATION" {
 				sa = a
 				break
 			}
@@ -252,7 +252,7 @@ func main() {
 		fixed_flavours, err = api.ListFixedInstanceSizes()
 		for _, fl := range fixed_flavours {
 			//look for 'M' size
-			if fl.Name == "VPS_M" {
+			if fl.Name == "M" {
 				fixed_size_id = fl.Id
 				break
 			}

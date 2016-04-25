@@ -21,6 +21,7 @@ type LoadBalancer struct {
 	Method                string             `json:"method,omitempty"`
 	Rules                 []LoadBalancerRule `json:"rules,omitempty"`
 	ServerIps             []ServerIpInfo     `json:"server_ips,omitempty"`
+	Datacenter            *Datacenter        `json:"datacenter,omitempty"`
 	CloudPanelId          string             `json:"cloudpanel_id,omitempty"`
 }
 
@@ -32,16 +33,18 @@ type LoadBalancerRule struct {
 	Source       string `json:"source,omitempty"`
 }
 
-type LoadBalancerUpdate struct {
-	Name                  string `json:"name,omitempty"`
-	Description           string `json:"description,omitempty"`
-	HealthCheckTest       string `json:"health_check_test,omitempty"`
-	HealthCheckInterval   *int   `json:"health_check_interval"`
-	HealthCheckPath       string `json:"health_check_path,omitempty"`
-	HealthCheckPathParser string `json:"health_check_path_parser,omitempty"`
-	Persistence           *bool  `json:"persistence"`
-	PersistenceTime       *int   `json:"persistence_time"`
-	Method                string `json:"method,omitempty"`
+type LoadBalancerRequest struct {
+	Name                  string             `json:"name,omitempty"`
+	Description           string             `json:"description,omitempty"`
+	DatacenterId          string             `json:"datacenter_id,omitempty"`
+	HealthCheckTest       string             `json:"health_check_test,omitempty"`
+	HealthCheckInterval   *int               `json:"health_check_interval"`
+	HealthCheckPath       string             `json:"health_check_path,omitempty"`
+	HealthCheckPathParser string             `json:"health_check_path_parser,omitempty"`
+	Persistence           *bool              `json:"persistence"`
+	PersistenceTime       *int               `json:"persistence_time"`
+	Method                string             `json:"method,omitempty"`
+	Rules                 []LoadBalancerRule `json:"rules,omitempty"`
 }
 
 // GET /load_balancers
@@ -62,10 +65,10 @@ func (api *API) ListLoadBalancers(args ...interface{}) ([]LoadBalancer, error) {
 }
 
 // POST /load_balancers
-func (api *API) CreateLoadBalancer(lb *LoadBalancer) (string, *LoadBalancer, error) {
+func (api *API) CreateLoadBalancer(request *LoadBalancerRequest) (string, *LoadBalancer, error) {
 	url := createUrl(api, loadBalancerPathSegment)
 	result := new(LoadBalancer)
-	err := api.Client.Post(url, &lb, &result, http.StatusAccepted)
+	err := api.Client.Post(url, &request, &result, http.StatusAccepted)
 	if err != nil {
 		return "", nil, err
 	}
@@ -98,10 +101,10 @@ func (api *API) DeleteLoadBalancer(lb_id string) (*LoadBalancer, error) {
 }
 
 // PUT /load_balancers/{id}
-func (api *API) UpdateLoadBalancer(lb_id string, lb_update *LoadBalancerUpdate) (*LoadBalancer, error) {
+func (api *API) UpdateLoadBalancer(lb_id string, request *LoadBalancerRequest) (*LoadBalancer, error) {
 	url := createUrl(api, loadBalancerPathSegment, lb_id)
 	result := new(LoadBalancer)
-	err := api.Client.Put(url, &lb_update, &result, http.StatusAccepted)
+	err := api.Client.Put(url, &request, &result, http.StatusAccepted)
 	if err != nil {
 		return nil, err
 	}

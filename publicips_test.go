@@ -36,7 +36,7 @@ func wait_for_ip_ready(ip_address *PublicIp, sec time.Duration, count int, state
 
 func create_public_ip() *PublicIp {
 	fmt.Printf("Creating an IPV4 public ip...\n")
-	pip_id, pip, err := api.CreatePublicIp(IpTypeV4, ip_dns)
+	pip_id, pip, err := api.CreatePublicIp(IpTypeV4, ip_dns, "")
 	if err != nil {
 		fmt.Printf("Unable to create a public ip address. Error: %s", err.Error())
 		return nil
