@@ -1,8 +1,8 @@
-# 1&1 Cloudserver Go SDK
+# 1&amp;1  Cloudserver Go SDK
 
-The 1&1 Go SDK is a Go library designed for interaction with the 1&1 cloud platform over the REST API.
+The 1&amp;1  Go SDK is a Go library designed for interaction with the 1&amp;1  cloud platform over the REST API.
 
-This guide contains instructions on getting started with the library and automating various management tasks available through the 1&1 Cloud Panel UI.
+This guide contains instructions on getting started with the library and automating various management tasks available through the 1&amp;1  Cloud Panel UI.
 
 ## Table of Contents
 
@@ -18,29 +18,34 @@ This guide contains instructions on getting started with the library and automat
   - [Load Balancers](#load-balancers)
   - [Public IPs](#public-ips)
   - [Private Networks](#private-networks)
+  - [VPNs](#vpns)
   - [Monitoring Center](#monitoring-center)
   - [Monitoring Policies](#monitoring-policies)
   - [Logs](#logs)
   - [Users](#users)
+  - [Roles](#roles)
   - [Usages](#usages)
   - [Server Appliances](#server-appliances)
   - [DVD ISO](#dvd-iso)
+  - [Ping](#ping)
+  - [Pricing](#pricing)
+  - [Data Centers](#data-centers)
 - [Examples](#examples)
 - [Index](#index)
 
 ## Overview
 
-This SDK is a wrapper for the 1&1 REST API written in Go(lang). All operations against the API are performed over SSL and authenticated using your 1&1 token key. The Go library facilitates the access to the REST API either within an instance running on 1&1 platform or directly across the Internet from any HTTPS-enabled application.
+This SDK is a wrapper for the 1&amp;1  REST API written in Go(lang). All operations against the API are performed over SSL and authenticated using your 1&amp;1  token key. The Go library facilitates the access to the REST API either within an instance running on 1&amp;1  platform or directly across the Internet from any HTTPS-enabled application.
 
 ## Getting Started
 
-Before you begin you will need to have signed up for a 1&1 account. The credentials you create during sign-up will be used to authenticate against the API.
+Before you begin you will need to have signed up for a 1&amp;1  account. The credentials you create during sign-up will be used to authenticate against the API.
 
 Install the Go language tools. Find the install package and instructions on the official <a href='https://golang.org/doc/install'>Go website</a>. Make sure that you have set up the `GOPATH` environment variable properly, as indicated in the instructions.
 
 ### Installation
 
-The official Go library is available from the 1&1 GitHub account found <a href='https://github.com/1and1/oneandone-cloudserver-sdk-go'>here</a>.
+The official Go library is available from the 1&amp;1  GitHub account found <a href='https://github.com/1and1/oneandone-cloudserver-sdk-go'>here</a>.
 
 Use the following Go command to download oneandone-cloudserver-sdk-go to your configured GOPATH:
 
@@ -605,14 +610,14 @@ If any of the parameters `sort`, `query` or `fields` is set to an empty string, 
 **Create a load balancer:**
 
 ```
-request := oneandone.LoadBalancer {
+request := oneandone.LoadBalancerRequest {
     Name: lb_name, 
     Description: lb_description,
     Method: lb_method,
-    Persistence: true_or_false,
-    PersistenceTime: seconds1,
+    Persistence: oneandone.Bool2Pointer(true_or_false),
+    PersistenceTime: oneandone.Int2Pointer(seconds1),
     HealthCheckTest: protocol1,
-    HealthCheckInterval: seconds2,
+    HealthCheckInterval: oneandone.Int2Pointer(seconds2),
     HealthCheckPath: health_check_path,
     HealthCheckPathParser: health_check_path_parser,
     Rules: []oneandone.LoadBalancerRule {
@@ -631,7 +636,7 @@ Optional parameters are `HealthCheckPath`, `HealthCheckPathParser`, `Source` and
 
 **Update a load balancer:**
 ```
-request := oneandone.LoadBalancerUpdate {
+request := oneandone.LoadBalancerRequest {
     Name: new_name,
     Description: new_description,
     Persistence: oneandone.Bool2Pointer(true_or_false),
@@ -836,6 +841,47 @@ All parameters in the request are optional.
 `private_net, err := api.DetachPrivateNetworkServer(pn_id, server_id)`
 
 *Note:* The server cannot be removed from a private network if it currently has a snapshot or it is powered on.
+
+
+### VPNs
+
+**List all VPNs:**
+
+`vpns, err := api.ListVPNs()`
+
+Alternatively, use the method with query parameters.
+
+`vpns, err := api.ListVPNs(page, per_page, sort, query, fields)`
+
+To paginate the list of VPNs received in the response use `page` and `per_page` parameters. Set ` per_page` to the number of VPNs that will be shown in each page. `page` indicates the current page. When set to an integer value that is less or equal to zero, the parameters are ignored by the framework.
+
+To receive the list of VPNs sorted in expected order pass a VPN property (e.g. `"name"`) in `sort` parameter. Prefix the sorting attribute with `-` sign for sorting in descending order.
+
+Use `query` parameter to search for a string in the response and return only the VPN instances that contain it.
+
+To retrieve a collection of VPNs containing only the requested fields pass a list of comma separated properties (e.g. `"id,name,creation_date"`) in `fields` parameter.
+
+If any of the parameters `sort`, `query` or `fields` is set to an empty string, it is ignored in the request.
+
+**Retrieve information about a VPN:**
+
+`vpn, err := api.GetVPN(vpn_id)`
+
+**Create a VPN:**
+
+`vpn, err := api.CreateVPN(vpn_name, vpn_description, datacenter_id)`
+
+**Modify a VPN:**
+
+`vpn, err := api.ModifyVPN(vpn_id, new_name, new_description)`
+
+**Delete a VPN:**
+
+`vpn, err := api.DeleteVPN(vpn_id)`
+
+**Retrieve a VPN's configuration file:**
+
+`base64_encoded_string, err := api.GetVPNConfigFile(vpn_id)`
 
 
 ### Monitoring Center
@@ -1282,6 +1328,79 @@ user, err := api.AddUserApiAlowedIps(user_id, user_ips)
 
 `user, err := api.RenewUserApiKey(user_id)`
 
+**Retrieve current user permissions:**
+
+`permissions, err := api.GetCurrentUserPermissions()`
+
+
+### Roles
+
+**List all roles:**
+
+`roles, err := api.ListRoles()`
+
+Alternatively, use the method with query parameters.
+
+`roles, err := api.ListRoles(page, per_page, sort, query, fields)`
+
+To paginate the list of roles received in the response use `page` and `per_page` parameters. Set ` per_page` to the number of roles that will be shown in each page. `page` indicates the current page. When set to an integer value that is less or equal to zero, the parameters are ignored by the framework.
+
+To receive the list of roles sorted in expected order pass a role property (e.g. `"name"`) in `sort` parameter. Prefix the sorting attribute with `-` sign for sorting in descending order.
+
+Use `query` parameter to search for a string in the response and return only the role instances that contain it.
+
+To retrieve a collection of roles containing only the requested fields pass a list of comma separated properties (e.g. `"id,name,creation_date"`) in `fields` parameter.
+
+If any of the parameters `sort`, `query` or `fields` is set to an empty string, it is ignored in the request.
+
+**Retrieve information about a role:**
+
+`role, err := api.GetRole(role_id)`
+
+**Create a role:**
+
+`role, err := api.CreateRole(role_name)`
+
+**Clone a role:**
+
+`role, err := api.CloneRole(role_id, new_role_name)`
+
+**Modify a role:**
+
+`role, err := api.ModifyRole(role_id, new_name, new_description, new_state)`
+
+`ACTIVE` and `DISABLE` are valid values for the state.
+
+**Delete a role:**
+
+`role, err := api.DeleteRole(role_id)`
+
+**Retrieve information about a role's permissions:**
+
+`permissions, err := api.GetRolePermissions(role_id)`
+
+**Modify a role's permissions:**
+
+`role, err := api.ModifyRolePermissions(role_id, permissions)`
+
+**Assign users to a role:**
+
+`role, err := api.AssignRoleUsers(role_id, user_ids)`
+
+`user_ids` is a slice of user ID's.
+
+**List a role's users:**
+
+`users, err := api.ListRoleUsers(role_id)`
+
+**Retrieve information about a role's user:**
+
+`user, err := api.GetRoleUser(role_id, user_id)`
+
+**Remove a role's user:**
+
+`role, err := api.RemoveRoleUser(role_id, user_id)`
+
 
 ### Usages
 
@@ -1358,6 +1477,43 @@ If any of the parameters `sort`, `query` or `fields` is blank, it is ignored in 
 `dvd_iso, err := api.GetDvdIso(dvd_id)`
 
 
+### Ping
+
+**Check if 1&amp;1 REST API is running:**
+
+`response, err := api.Ping()`
+
+If the API is running, the response is a single-element slice `["PONG"]`.
+
+**Validate if 1&amp;1 REST API is running and the authorization token is valid:**
+
+`response, err := api.PingAuth()`
+
+The response should be a single-element slice `["PONG"]` if the API is running and the token is valid.
+
+
+### Pricing
+
+**Show prices for all available resources in the Cloud Panel:**
+
+`pricing, err := api.GetPricing()`
+
+
+### Data Centers
+
+**List all 1&amp;1 Cloud Server data centers:**
+
+`datacenters, err := api.ListDatacenters()`
+
+Here is another example of an alternative form of the list function that includes query parameters.
+
+`datacenters, err := api.ListDatacenters(0, 0, "country_code", "DE", "id,country_code")`
+
+**Retrieve a specific data center:**
+
+`datacenter, err := api.GetDatacenter(datacenter_id)`
+
+
 ## Examples
 
 ```Go
@@ -1380,7 +1536,7 @@ func main() {
 
 	var sa oneandone.ServerAppliance
 	for _, a := range saps {
-		if a.IsAutomaticInstall && a.Type == "IMAGE" {
+		if a.Type == "IMAGE" {
 			sa = a
 		}
 	}
@@ -1415,14 +1571,14 @@ func main() {
 	server, err = api.GetServer(server_id)
 
 	// Create a load balancer
-	lbr := oneandone.LoadBalancer {
+	lbr := oneandone.LoadBalancerRequest {
 		Name: "Load Balancer Example", 
 		Description: "API created load balancer.",
 		Method: "ROUND_ROBIN",
-		Persistence: true,
-		PersistenceTime: 1200,
+		Persistence: oneandone.Bool2Pointer(true),
+		PersistenceTime: oneandone.Int2Pointer(1200),
 		HealthCheckTest: "TCP",
-		HealthCheckInterval: 40,
+		HealthCheckInterval: oneandone.Int2Pointer(40),
 		Rules: []oneandone.LoadBalancerRule {
 				{
 					Protocol: "TCP",
@@ -1578,7 +1734,7 @@ func main() {
 
 		var sa oneandone.ServerAppliance
 		for _, a := range saps {
-			if a.IsAutomaticInstall && a.Type == "APPLICATION" {
+			if a.Type == "APPLICATION" {
 				sa = a
 				break
 			}
@@ -1590,7 +1746,7 @@ func main() {
 		fixed_flavours, err = client.ListFixedInstanceSizes()
 		for _, fl := range fixed_flavours {
 			//look for 'M' size
-			if fl.Name == "VPS_M" {
+			if fl.Name == "M" {
 				fixed_size_id = fl.Id
 				break
 			}
@@ -1618,932 +1774,798 @@ func main() {
 ## Index
 
 ```Go
-
 func New(token string, url string) *API
-
 ```
 
 ```Go
-
 func (api *API) AddFirewallPolicyRules(fp_id string, fp_rules []FirewallPolicyRule) (*FirewallPolicy, error)
-
 ```
 
 ```Go
-
 func (api *API) AddFirewallPolicyServerIps(fp_id string, ip_ids []string) (*FirewallPolicy, error)
-
 ```
 
 ```Go
-
 func (api *API) AddLoadBalancerRules(lb_id string, lb_rules []LoadBalancerRule) (*LoadBalancer, error)
-
 ```
 
 ```Go
-
 func (api *API) AddLoadBalancerServerIps(lb_id string, ip_ids []string) (*LoadBalancer, error)
-
 ```
 
 ```Go
-
 func (api *API) AddMonitoringPolicyPorts(mp_id string, mp_ports []MonitoringPort) (*MonitoringPolicy, error)
-
 ```
 
 ```Go
-
 func (api *API) AddMonitoringPolicyProcesses(mp_id string, mp_procs []MonitoringProcess) (*MonitoringPolicy, error)
-
 ```
 
 ```Go
-
 func (api *API) AddServerHdds(server_id string, hdds *ServerHdds) (*Server, error)
-
 ```
 
 ```Go
-
 func (api *API) AddSharedStorageServers(st_id string, servers []SharedStorageServer) (*SharedStorage, error)
-
 ```
 
 ```Go
-
 func (api *API) AddUserApiAlowedIps(user_id string, ips []string) (*User, error)
-
 ```
 
 ```Go
+func (api *API) AssignRoleUsers(role_id string, user_ids []string) (*Role, error)
+```
 
+```Go
 func (api *API) AssignServerIp(server_id string, ip_type string) (*Server, error)
-
 ```
 
 ```Go
-
 func (api *API) AssignServerIpFirewallPolicy(server_id string, ip_id string, fp_id string) (*Server, error)
-
 ```
 
 ```Go
-
 func (api *API) AssignServerIpLoadBalancer(server_id string, ip_id string, lb_id string) (*Server, error)
-
 ```
 
 ```Go
-
 func (api *API) AssignServerPrivateNetwork(server_id string, pn_id string) (*Server, error)
-
 ```
 
 ```Go
-
 func (api *API) AttachMonitoringPolicyServers(mp_id string, sids []string) (*MonitoringPolicy, error)
-
 ```
 
 ```Go
-
 func (api *API) AttachPrivateNetworkServers(pn_id string, sids []string) (*PrivateNetwork, error)
-
 ```
 
 ```Go
-
-func (api *API) CloneServer(server_id string, new_name string) (*Server, error)
-
+func (api *API) CloneRole(role_id string, name string) (*Role, error)
 ```
 
 ```Go
+func (api *API) CloneServer(server_id string, new_name string, datacenter_id string) (*Server, error)
+```
 
+```Go
 func (api *API) CreateFirewallPolicy(fp_data *FirewallPolicyRequest) (string, *FirewallPolicy, error)
-
 ```
 
 ```Go
-
 func (api *API) CreateImage(request *ImageConfig) (string, *Image, error)
-
 ```
 
 ```Go
-
-func (api *API) CreateLoadBalancer(lb *LoadBalancer) (string, *LoadBalancer, error)
-
+func (api *API) CreateLoadBalancer(request *LoadBalancerRequest) (string, *LoadBalancer, error)
 ```
 
 ```Go
-
 func (api *API) CreateMonitoringPolicy(mp *MonitoringPolicy) (string, *MonitoringPolicy, error)
-
 ```
 
 ```Go
-
 func (api *API) CreatePrivateNetwork(request *PrivateNetworkRequest) (string, *PrivateNetwork, error)
-
 ```
 
 ```Go
-
-func (api *API) CreatePublicIp(ip_type string, reverse_dns string) (string, *PublicIp, error)
-
+func (api *API) CreatePublicIp(ip_type string, reverse_dns string, datacenter_id string) (string, *PublicIp, error)
 ```
 
 ```Go
+func (api *API) CreateRole(name string) (string, *Role, error)
+```
 
+```Go
 func (api *API) CreateServer(request *ServerRequest) (string, *Server, error)
-
 ```
 
 ```Go
-
 func (api *API) CreateServerEx(request *ServerRequest, timeout int) (string, string, error)
-
 ```
 
 ```Go
-
 func (api *API) CreateServerSnapshot(server_id string) (*Server, error)
-
 ```
 
 ```Go
-
 func (api *API) CreateSharedStorage(request *SharedStorageRequest) (string, *SharedStorage, error)
-
 ```
 
 ```Go
-
 func (api *API) CreateUser(user *UserRequest) (string, *User, error)
-
 ```
 
 ```Go
+func (api *API) CreateVPN(name string, description string, datacenter_id string) (string, *VPN, error)
+```
 
+```Go
 func (api *API) DeleteFirewallPolicy(fp_id string) (*FirewallPolicy, error)
-
 ```
 
 ```Go
-
 func (api *API) DeleteFirewallPolicyRule(fp_id string, rule_id string) (*FirewallPolicy, error)
-
 ```
 
 ```Go
-
 func (api *API) DeleteFirewallPolicyServerIp(fp_id string, ip_id string) (*FirewallPolicy, error)
-
 ```
 
 ```Go
-
 func (api *API) DeleteImage(img_id string) (*Image, error)
-
 ```
 
 ```Go
-
 func (api *API) DeleteLoadBalancer(lb_id string) (*LoadBalancer, error)
-
 ```
 
 ```Go
-
 func (api *API) DeleteLoadBalancerRule(lb_id string, rule_id string) (*LoadBalancer, error)
-
 ```
 
 ```Go
-
 func (api *API) DeleteLoadBalancerServerIp(lb_id string, ip_id string) (*LoadBalancer, error)
-
 ```
 
 ```Go
-
 func (api *API) DeleteMonitoringPolicy(mp_id string) (*MonitoringPolicy, error)
-
 ```
 
 ```Go
-
 func (api *API) DeleteMonitoringPolicyPort(mp_id string, port_id string) (*MonitoringPolicy, error)
-
 ```
 
 ```Go
-
 func (api *API) DeleteMonitoringPolicyProcess(mp_id string, proc_id string) (*MonitoringPolicy, error)
-
 ```
 
 ```Go
-
 func (api *API) DeletePrivateNetwork(pn_id string) (*PrivateNetwork, error)
-
 ```
 
 ```Go
-
 func (api *API) DeletePublicIp(ip_id string) (*PublicIp, error)
-
 ```
 
 ```Go
+func (api *API) DeleteRole(role_id string) (*Role, error)
+```
 
+```Go
 func (api *API) DeleteServer(server_id string, keep_ips bool) (*Server, error)
-
 ```
 
 ```Go
-
 func (api *API) DeleteServerHdd(server_id string, hdd_id string) (*Server, error)
-
 ```
 
 ```Go
-
 func (api *API) DeleteServerIp(server_id string, ip_id string, keep_ip bool) (*Server, error)
-
 ```
 
 ```Go
-
 func (api *API) DeleteServerSnapshot(server_id string, snapshot_id string) (*Server, error)
-
 ```
 
 ```Go
-
 func (api *API) DeleteSharedStorage(ss_id string) (*SharedStorage, error)
-
 ```
 
 ```Go
-
 func (api *API) DeleteSharedStorageServer(st_id string, ser_id string) (*SharedStorage, error)
-
 ```
 
 ```Go
-
 func (api *API) DeleteUser(user_id string) (*User, error)
-
 ```
 
 ```Go
+func (api *API) DeleteVPN(vpn_id string) (*VPN, error)
+```
 
+```Go
 func (api *API) DetachPrivateNetworkServer(pn_id string, pns_id string) (*PrivateNetwork, error)
-
 ```
 
 ```Go
-
 func (api *API) EjectServerDvd(server_id string) (*Server, error)
-
 ```
 
 ```Go
+func (api *API) GetCurrentUserPermissions() (*Permissions, error)
+```
 
+```Go
+func (api *API) GetDatacenter(dc_id string) (*Datacenter, error)
+```
+
+```Go
 func (api *API) GetDvdIso(dvd_id string) (*DvdIso, error)
-
 ```
 
 ```Go
-
 func (api *API) GetFirewallPolicy(fp_id string) (*FirewallPolicy, error)
-
 ```
 
 ```Go
-
 func (api *API) GetFirewallPolicyRule(fp_id string, rule_id string) (*FirewallPolicyRule, error)
-
 ```
 
 ```Go
-
 func (api *API) GetFirewallPolicyServerIp(fp_id string, ip_id string) (*ServerIpInfo, error)
-
 ```
 
 ```Go
-
 func (api *API) GetFixedInstanceSize(fis_id string) (*FixedInstanceInfo, error)
-
 ```
 
 ```Go
-
 func (api *API) GetImage(img_id string) (*Image, error)
-
 ```
 
 ```Go
-
 func (api *API) GetLoadBalancer(lb_id string) (*LoadBalancer, error)
-
 ```
 
 ```Go
-
 func (api *API) GetLoadBalancerRule(lb_id string, rule_id string) (*LoadBalancerRule, error)
-
 ```
 
 ```Go
-
 func (api *API) GetLoadBalancerServerIp(lb_id string, ip_id string) (*ServerIpInfo, error)
-
 ```
 
 ```Go
-
 func (api *API) GetLog(log_id string) (*Log, error)
-
 ```
 
 ```Go
-
 func (api *API) GetMonitoringPolicy(mp_id string) (*MonitoringPolicy, error)
-
 ```
 
 ```Go
-
 func (api *API) GetMonitoringPolicyPort(mp_id string, port_id string) (*MonitoringPort, error)
-
 ```
 
 ```Go
-
 func (api *API) GetMonitoringPolicyProcess(mp_id string, proc_id string) (*MonitoringProcess, error)
-
 ```
 
 ```Go
-
 func (api *API) GetMonitoringPolicyServer(mp_id string, ser_id string) (*Identity, error)
-
 ```
 
 ```Go
-
 func (api *API) GetMonitoringServerUsage(ser_id string, period string, dates ...time.Time) (*MonServerUsageDetails, error)
-
 ```
 
 ```Go
+func (api *API) GetPricing() (*Pricing, error)
+```
 
+```Go
 func (api *API) GetPrivateNetwork(pn_id string) (*PrivateNetwork, error)
-
 ```
 
 ```Go
-
 func (api *API) GetPrivateNetworkServer(pn_id string, server_id string) (*Identity, error)
-
 ```
 
 ```Go
-
 func (api *API) GetPublicIp(ip_id string) (*PublicIp, error)
-
 ```
 
 ```Go
+func (api *API) GetRole(role_id string) (*Role, error)
+```
 
+```Go
+func (api *API) GetRolePermissions(role_id string) (*Permissions, error)
+```
+
+```Go
+func (api *API) GetRoleUser(role_id string, user_id string) (*Identity, error)
+```
+
+```Go
 func (api *API) GetServer(server_id string) (*Server, error)
-
 ```
 
 ```Go
-
 func (api *API) GetServerAppliance(sa_id string) (*ServerAppliance, error)
-
 ```
 
 ```Go
-
 func (api *API) GetServerDvd(server_id string) (*Identity, error)
-
 ```
 
 ```Go
-
 func (api *API) GetServerHardware(server_id string) (*Hardware, error)
-
 ```
 
 ```Go
-
 func (api *API) GetServerHdd(server_id string, hdd_id string) (*Hdd, error)
-
 ```
 
 ```Go
-
 func (api *API) GetServerImage(server_id string) (*Identity, error)
-
 ```
 
 ```Go
-
 func (api *API) GetServerIp(server_id string, ip_id string) (*ServerIp, error)
-
 ```
 
 ```Go
-
 func (api *API) GetServerIpFirewallPolicy(server_id string, ip_id string) (*Identity, error)
-
 ```
 
 ```Go
-
 func (api *API) GetServerPrivateNetwork(server_id string, pn_id string) (*PrivateNetwork, error)
-
 ```
 
 ```Go
-
 func (api *API) GetServerSnapshot(server_id string) (*ServerSnapshot, error)
-
 ```
 
 ```Go
-
 func (api *API) GetServerStatus(server_id string) (*Status, error)
-
 ```
 
 ```Go
-
 func (api *API) GetSharedStorage(ss_id string) (*SharedStorage, error)
-
 ```
 
 ```Go
-
 func (api *API) GetSharedStorageCredentials() ([]SharedStorageAccess, error)
-
 ```
 
 ```Go
-
 func (api *API) GetSharedStorageServer(st_id string, ser_id string) (*SharedStorageServer, error)
-
 ```
 
 ```Go
-
 func (api *API) GetUser(user_id string) (*User, error)
-
 ```
 
 ```Go
-
 func (api *API) GetUserApi(user_id string) (*UserApi, error)
-
 ```
 
 ```Go
-
 func (api *API) GetUserApiKey(user_id string) (*UserApiKey, error)
-
 ```
 
 ```Go
+func (api *API) GetVPN(vpn_id string) (*VPN, error)
+```
 
+```Go
+func (api *API) GetVPNConfigFile(vpn_id string) (string, error)
+```
+
+```Go
+func (api *API) ListDatacenters(args ...interface{}) ([]Datacenter, error)
+```
+
+```Go
 func (api *API) ListDvdIsos(args ...interface{}) ([]DvdIso, error)
-
 ```
 
 ```Go
-
 func (api *API) ListFirewallPolicies(args ...interface{}) ([]FirewallPolicy, error)
-
 ```
 
 ```Go
-
 func (api *API) ListFirewallPolicyRules(fp_id string) ([]FirewallPolicyRule, error)
-
 ```
 
 ```Go
-
 func (api *API) ListFirewallPolicyServerIps(fp_id string) ([]ServerIpInfo, error)
-
 ```
 
 ```Go
-
 func (api *API) ListFixedInstanceSizes() ([]FixedInstanceInfo, error)
-
 ```
 
 ```Go
-
 func (api *API) ListImages(args ...interface{}) ([]Image, error)
-
 ```
 
 ```Go
-
 func (api *API) ListLoadBalancerRules(lb_id string) ([]LoadBalancerRule, error)
-
 ```
 
 ```Go
-
 func (api *API) ListLoadBalancerServerIps(lb_id string) ([]ServerIpInfo, error)
-
 ```
 
 ```Go
-
 func (api *API) ListLoadBalancers(args ...interface{}) ([]LoadBalancer, error)
-
 ```
 
 ```Go
-
 func (api *API) ListLogs(period string, sd *time.Time, ed *time.Time, args ...interface{}) ([]Log, error)
-
 ```
 
 ```Go
-
 func (api *API) ListMonitoringPolicies(args ...interface{}) ([]MonitoringPolicy, error)
-
 ```
 
 ```Go
-
 func (api *API) ListMonitoringPolicyPorts(mp_id string) ([]MonitoringPort, error)
-
 ```
 
 ```Go
-
 func (api *API) ListMonitoringPolicyProcesses(mp_id string) ([]MonitoringProcess, error)
-
 ```
 
 ```Go
-
 func (api *API) ListMonitoringPolicyServers(mp_id string) ([]Identity, error)
-
 ```
 
 ```Go
-
 func (api *API) ListMonitoringServersUsages(args ...interface{}) ([]MonServerUsageSummary, error)
-
 ```
 
 ```Go
-
 func (api *API) ListPrivateNetworkServers(pn_id string) ([]Identity, error)
-
 ```
 
 ```Go
-
 func (api *API) ListPrivateNetworks(args ...interface{}) ([]PrivateNetwork, error)
-
 ```
 
 ```Go
-
 func (api *API) ListPublicIps(args ...interface{}) ([]PublicIp, error)
-
 ```
 
 ```Go
+func (api *API) ListRoleUsers(role_id string) ([]Identity, error)
+```
 
+```Go
+func (api *API) ListRoles(args ...interface{}) ([]Role, error)
+```
+
+```Go
 func (api *API) ListServerAppliances(args ...interface{}) ([]ServerAppliance, error)
-
 ```
 
 ```Go
-
 func (api *API) ListServerHdds(server_id string) ([]Hdd, error)
-
 ```
 
 ```Go
-
 func (api *API) ListServerIpLoadBalancers(server_id string, ip_id string) ([]Identity, error)
-
 ```
 
 ```Go
-
 func (api *API) ListServerIps(server_id string) ([]ServerIp, error)
-
 ```
 
 ```Go
-
 func (api *API) ListServerPrivateNetworks(server_id string) ([]Identity, error)
-
 ```
 
 ```Go
-
 func (api *API) ListServers(args ...interface{}) ([]Server, error)
-
 ```
 
 ```Go
-
 func (api *API) ListSharedStorageServers(st_id string) ([]SharedStorageServer, error)
-
 ```
 
 ```Go
-
 func (api *API) ListSharedStorages(args ...interface{}) ([]SharedStorage, error)
-
 ```
 
 ```Go
-
 func (api *API) ListUsages(period string, sd *time.Time, ed *time.Time, args ...interface{}) (*Usages, error)
-
 ```
 
 ```Go
-
 func (api *API) ListUserApiAllowedIps(user_id string) ([]string, error)
-
 ```
 
 ```Go
-
 func (api *API) ListUsers(args ...interface{}) ([]User, error)
-
 ```
 
 ```Go
+func (api *API) ListVPNs(args ...interface{}) ([]VPN, error)
+```
 
+```Go
 func (api *API) LoadServerDvd(server_id string, dvd_id string) (*Server, error)
-
 ```
 
 ```Go
-
 func (api *API) ModifyMonitoringPolicyPort(mp_id string, port_id string, mp_port *MonitoringPort) (*MonitoringPolicy, error)
-
 ```
 
 ```Go
-
 func (api *API) ModifyMonitoringPolicyProcess(mp_id string, proc_id string, mp_proc *MonitoringProcess) (*MonitoringPolicy, error)
-
 ```
 
 ```Go
+func (api *API) ModifyRole(role_id string, name string, description string, state string) (*Role, error)
+```
 
+```Go
+func (api *API) ModifyRolePermissions(role_id string, perm *Permissions) (*Role, error)
+```
+
+```Go
 func (api *API) ModifyUser(user_id string, user *UserRequest) (*User, error)
-
 ```
 
 ```Go
-
 func (api *API) ModifyUserApi(user_id string, active bool) (*User, error)
-
 ```
 
 ```Go
+func (api *API) ModifyVPN(vpn_id string, name string, description string) (*VPN, error)
+```
 
+```Go
+func (api *API) Ping() ([]string, error)
+```
+
+```Go
+func (api *API) PingAuth() ([]string, error)
+```
+
+```Go
 func (api *API) RebootServer(server_id string, is_hardware bool) (*Server, error)
-
 ```
 
 ```Go
-
 func (api *API) ReinstallServerImage(server_id string, image_id string, password string, fp_id string) (*Server, error)
-
 ```
 
 ```Go
-
 func (api *API) RemoveMonitoringPolicyServer(mp_id string, ser_id string) (*MonitoringPolicy, error)
-
 ```
 
 ```Go
+func (api *API) RemoveRoleUser(role_id string, user_id string) (*Role, error)
+```
 
+```Go
 func (api *API) RemoveServerPrivateNetwork(server_id string, pn_id string) (*Server, error)
-
 ```
 
 ```Go
-
 func (api *API) RemoveUserApiAllowedIp(user_id string, ip string) (*User, error)
-
 ```
 
 ```Go
-
 func (api *API) RenameServer(server_id string, new_name string, new_desc string) (*Server, error)
-
 ```
 
 ```Go
-
 func (api *API) RenewUserApiKey(user_id string) (*User, error)
-
 ```
 
 ```Go
-
 func (api *API) ResizeServerHdd(server_id string, hdd_id string, new_size int) (*Server, error)
-
 ```
 
 ```Go
-
 func (api *API) RestoreServerSnapshot(server_id string, snapshot_id string) (*Server, error)
-
 ```
 
 ```Go
-
 func (api *API) ShutdownServer(server_id string, is_hardware bool) (*Server, error)
-
 ```
 
 ```Go
-
 func (api *API) StartServer(server_id string) (*Server, error)
-
 ```
 
 ```Go
-
 func (api *API) UnassignServerIpFirewallPolicy(server_id string, ip_id string) (*Server, error)
-
 ```
 
 ```Go
-
 func (api *API) UnassignServerIpLoadBalancer(server_id string, ip_id string, lb_id string) (*Server, error)
-
 ```
 
 ```Go
-
 func (api *API) UpdateFirewallPolicy(fp_id string, fp_new_name string, fp_new_desc string) (*FirewallPolicy, error)
-
 ```
 
 ```Go
-
 func (api *API) UpdateImage(img_id string, new_name string, new_desc string, new_freq string) (*Image, error)
-
 ```
 
 ```Go
-
-func (api *API) UpdateLoadBalancer(lb_id string, lb_update *LoadBalancerUpdate) (*LoadBalancer, error)
-
+func (api *API) UpdateLoadBalancer(lb_id string, request *LoadBalancerRequest) (*LoadBalancer, error)
 ```
 
 ```Go
-
 func (api *API) UpdateMonitoringPolicy(mp_id string, mp *MonitoringPolicy) (*MonitoringPolicy, error)
-
 ```
 
 ```Go
-
 func (api *API) UpdatePrivateNetwork(pn_id string, request *PrivateNetworkRequest) (*PrivateNetwork, error)
-
 ```
 
 ```Go
-
 func (api *API) UpdatePublicIp(ip_id string, reverse_dns string) (*PublicIp, error)
-
 ```
 
 ```Go
-
 func (api *API) UpdateServerHardware(server_id string, hardware *Hardware) (*Server, error)
-
 ```
 
 ```Go
-
 func (api *API) UpdateSharedStorage(ss_id string, request *SharedStorageRequest) (*SharedStorage, error)
-
 ```
 
 ```Go
-
 func (api *API) UpdateSharedStorageCredentials(new_pass string) ([]SharedStorageAccess, error)
-
 ```
 
 ```Go
-
 func (api *API) WaitForState(in ApiInstance, state string, sec time.Duration, count int) error
-
 ```
 
 ```Go
-
 func (api *API) WaitUntilDeleted(in ApiInstance) error
-
 ```
 
 ```Go
-
 func (fp *FirewallPolicy) GetState() (string, error)
-
 ```
 
 ```Go
-
 func (im *Image) GetState() (string, error)
-
 ```
 
 ```Go
-
 func (lb *LoadBalancer) GetState() (string, error)
-
 ```
 
 ```Go
-
 func (mp *MonitoringPolicy) GetState() (string, error)
-
 ```
 
 ```Go
-
 func (pn *PrivateNetwork) GetState() (string, error)
-
 ```
 
 ```Go
-
 func (ip *PublicIp) GetState() (string, error)
-
 ```
 
 ```Go
+func (role *Role) GetState() (string, error)
+```
 
+```Go
 func (s *Server) GetState() (string, error)
-
 ```
 
 ```Go
-
 func (ss *SharedStorage) GetState() (string, error)
-
 ```
 
 ```Go
-
 func (u *User) GetState() (string, error)
-
 ```
 
 ```Go
+func (u *User) GetState() (string, error)
+```
 
+```Go
+func (vpn *VPN) GetState() (string, error)
+```
+
+```Go
 func Bool2Pointer(input bool) *bool
-
 ```
 
 ```Go
-
 func Int2Pointer(input int) *int
-
 ```
 
 ```Go
+func (bp *BackupPerm) SetAll(value bool)
+```
 
+```Go
+func (fp *FirewallPerm) SetAll(value bool)
+```
+
+```Go
+func (imp *ImagePerm) SetAll(value bool)
+```
+
+```Go
+unc (inp *InvoicePerm) SetAll(value bool)
+```
+
+```Go
+func (ipp *IPPerm) SetAll(value bool)
+```
+
+```Go
+func (lbp *LoadBalancerPerm) SetAll(value bool)
+```
+
+```Go
+func (lp *LogPerm) SetAll(value bool)
+```
+
+```Go
+func (mcp *MonitorCenterPerm) SetAll(value bool)
+```
+
+```Go
+func (mpp *MonitorPolicyPerm) SetAll(value bool)
+```
+
+```Go
+func (p *Permissions) SetAll(v bool)
+```
+
+```Go
+func (pnp *PrivateNetworkPerm) SetAll(value bool)
+```
+
+```Go
+func (rp *RolePerm) SetAll(value bool)
+```
+
+```Go
+func (sp *ServerPerm) SetAll(value bool)
+```
+
+```Go
+func (ssp *SharedStoragePerm) SetAll(value bool)
+```
+
+```Go
+func (up *UsagePerm) SetAll(value bool)
+```
+
+```Go
+func (up *UserPerm) SetAll(value bool)
+```
+
+```Go
+func (vpnp *VPNPerm) SetAll(value bool)
+```
+
+```Go
 func SetBaseUrl(newbaseurl string) string
-
 ```
 
 ```Go
-
 func SetToken(newtoken string) string
-
 ```
 
