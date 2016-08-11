@@ -293,7 +293,7 @@ func (api *API) AssignRoleUsers(role_id string, user_ids []string) (*Role, error
 	req := struct {
 		Users []string `json:"users"`
 	}{user_ids}
-	err := api.Client.Post(url, &req, &result, http.StatusAccepted)
+	err := api.Client.Post(url, &req, &result, http.StatusCreated)
 	if err != nil {
 		return nil, err
 	}
