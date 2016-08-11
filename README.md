@@ -37,6 +37,8 @@ This guide contains instructions on getting started with the library and automat
 
 This SDK is a wrapper for the 1&amp;1  REST API written in Go(lang). All operations against the API are performed over SSL and authenticated using your 1&amp;1  token key. The Go library facilitates the access to the REST API either within an instance running on 1&amp;1  platform or directly across the Internet from any HTTPS-enabled application.
 
+For more information on the 1&1 Cloud Server SDK for Go, visit the [Community Portal](https://www.1and1.com/cloud-community/).
+
 ## Getting Started
 
 Before you begin you will need to have signed up for a 1&amp;1  account. The credentials you create during sign-up will be used to authenticate against the API.

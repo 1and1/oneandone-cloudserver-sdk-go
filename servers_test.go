@@ -5,6 +5,7 @@ import (
 	"math/rand"
 	"reflect"
 	"strconv"
+	"strings"
 	"sync"
 	"testing"
 	"time"
@@ -86,7 +87,7 @@ func get_random_appliance(max_disk_size int) ServerAppliance {
 	saps, _ := api.ListServerAppliances()
 	for {
 		i := rand.Intn(len(saps))
-		if saps[i].MinHddSize <= max_disk_size && saps[i].Type == "INTERNAL" {
+		if saps[i].MinHddSize <= max_disk_size && saps[i].Type == "IMAGE" && !strings.Contains(saps[i].Name, "2008") {
 			return saps[i]
 		}
 	}

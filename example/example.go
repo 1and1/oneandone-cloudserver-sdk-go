@@ -22,7 +22,7 @@ func main() {
 
 	var sa oneandone.ServerAppliance
 	for _, a := range saps {
-		if a.Type == "INTERNAL" {
+		if a.Type == "IMAGE" {
 			sa = a
 		}
 	}

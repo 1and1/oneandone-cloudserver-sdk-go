@@ -12,7 +12,7 @@ type ServerAppliance struct {
 	Version       string      `json:"version,omitempty"`
 	MinHddSize    int         `json:"min_hdd_size"`
 	Architecture  interface{} `json:"os_architecture"`
-	Licenses      []License   `json:"licenses,omitempty"`
+	Licenses      interface{} `json:"licenses,omitempty"`
 	Categories    []string    `json:"categories,omitempty"`
 	//	AvailableDatacenters []string  `json:"available_datacenters,omitempty"`
 	ApiPtr
