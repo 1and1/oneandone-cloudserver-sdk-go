@@ -193,7 +193,7 @@ func TestListRoleUsers(t *testing.T) {
 func TestAssignRemoveRoleUser(t *testing.T) {
 	set_role.Do(set_role_once)
 
-	users, _ := api.ListUsers(1, 1, "", "go_test_user", "")
+	users, _ := api.ListUsers(0, 0, "", "go_test_user", "")
 	if len(users) > 0 {
 		fmt.Printf("Assigning user '%s' to role '%s'...\n", users[0].Name, role_name)
 		usl := []string{users[0].Id}

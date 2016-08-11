@@ -15,18 +15,18 @@ type Role struct {
 
 type Permissions struct {
 	Backups         *BackupPerm         `json:"backups,omitempty"`
-	Firewalls       *FirewallPerm       `json:"firewalls,omitempty"`
+	Firewalls       *FirewallPerm       `json:"firewall_policies,omitempty"`
 	Images          *ImagePerm          `json:"images,omitempty"`
-	Invoice         *InvoicePerm        `json:"interactiveinvoice,omitempty"`
-	IPs             *IPPerm             `json:"ips,omitempty"`
-	LoadBalancers   *LoadBalancerPerm   `json:"loadbalancers,omitempty"`
+	Invoice         *InvoicePerm        `json:"interactive_invoices,omitempty"`
+	IPs             *IPPerm             `json:"public_ips,omitempty"`
+	LoadBalancers   *LoadBalancerPerm   `json:"load_balancers,omitempty"`
 	Logs            *LogPerm            `json:"logs,omitempty"`
-	MonitorCenter   *MonitorCenterPerm  `json:"monitoringcenter,omitempty"`
-	MonitorPolicies *MonitorPolicyPerm  `json:"monitoringpolicies,omitempty"`
-	PrivateNetworks *PrivateNetworkPerm `json:"privatenetwork,omitempty"`
+	MonitorCenter   *MonitorCenterPerm  `json:"monitoring_center,omitempty"`
+	MonitorPolicies *MonitorPolicyPerm  `json:"monitoring_policies,omitempty"`
+	PrivateNetworks *PrivateNetworkPerm `json:"private_networks,omitempty"`
 	Roles           *RolePerm           `json:"roles,omitempty"`
 	Servers         *ServerPerm         `json:"servers,omitempty"`
-	SharedStorage   *SharedStoragePerm  `json:"sharedstorages,omitempty"`
+	SharedStorage   *SharedStoragePerm  `json:"shared_storages,omitempty"`
 	Usages          *UsagePerm          `json:"usages,omitempty"`
 	Users           *UserPerm           `json:"users,omitempty"`
 	VPNs            *VPNPerm            `json:"vpn,omitempty"`
@@ -42,19 +42,19 @@ type FirewallPerm struct {
 	Clone                   bool `json:"clone"`
 	Create                  bool `json:"create"`
 	Delete                  bool `json:"delete"`
-	ManageAttachedServerIPs bool `json:"manageattachedserverip"`
-	ManageRules             bool `json:"managerule"`
-	SetDescription          bool `json:"setdescription"`
-	SetName                 bool `json:"setname"`
+	ManageAttachedServerIPs bool `json:"manage_attached_server_ips"`
+	ManageRules             bool `json:"manage_rules"`
+	SetDescription          bool `json:"set_description"`
+	SetName                 bool `json:"set_name"`
 	Show                    bool `json:"show"`
 }
 
 type ImagePerm struct {
 	Create            bool `json:"create"`
 	Delete            bool `json:"delete"`
-	DisableAutoCreate bool `json:"disableautomaticcreation"`
-	SetDescription    bool `json:"setdescription"`
-	SetName           bool `json:"setname"`
+	DisableAutoCreate bool `json:"disable_automatic_creation"`
+	SetDescription    bool `json:"set_description"`
+	SetName           bool `json:"set_name"`
 	Show              bool `json:"show"`
 }
 
@@ -66,18 +66,18 @@ type IPPerm struct {
 	Create        bool `json:"create"`
 	Delete        bool `json:"delete"`
 	Release       bool `json:"release"`
-	SetReverseDNS bool `json:"setreversedns"`
+	SetReverseDNS bool `json:"set_reverse_dns"`
 	Show          bool `json:"show"`
 }
 
 type LoadBalancerPerm struct {
 	Create                  bool `json:"create"`
 	Delete                  bool `json:"delete"`
-	ManageAttachedServerIPs bool `json:"manageattachedserverip"`
-	ManageRules             bool `json:"managerule"`
+	ManageAttachedServerIPs bool `json:"manage_attached_server_ips"`
+	ManageRules             bool `json:"manage_rules"`
 	Modify                  bool `json:"modify"`
-	SetDescription          bool `json:"setdescription"`
-	SetName                 bool `json:"setname"`
+	SetDescription          bool `json:"set_description"`
+	SetName                 bool `json:"set_name"`
 	Show                    bool `json:"show"`
 }
 
@@ -93,23 +93,23 @@ type MonitorPolicyPerm struct {
 	Clone                 bool `json:"clone"`
 	Create                bool `json:"create"`
 	Delete                bool `json:"delete"`
-	ManageAttachedServers bool `json:"manageattachedserver"`
-	ManagePorts           bool `json:"manageport"`
-	ManageProcesses       bool `json:"manageprocess"`
-	ModifyResources       bool `json:"modifyresources"`
-	SetDescription        bool `json:"setdescription"`
-	SetEmail              bool `json:"setemail"`
-	SetName               bool `json:"setname"`
+	ManageAttachedServers bool `json:"manage_attached_servers"`
+	ManagePorts           bool `json:"manage_ports"`
+	ManageProcesses       bool `json:"manage_processes"`
+	ModifyResources       bool `json:"modify_resources"`
+	SetDescription        bool `json:"set_description"`
+	SetEmail              bool `json:"set_email"`
+	SetName               bool `json:"set_name"`
 	Show                  bool `json:"show"`
 }
 
 type PrivateNetworkPerm struct {
 	Create                bool `json:"create"`
 	Delete                bool `json:"delete"`
-	ManageAttachedServers bool `json:"manageattachedserver"`
-	SetDescription        bool `json:"setdescription"`
-	SetName               bool `json:"setname"`
-	SetNetworkInfo        bool `json:"setnetworkinfo"`
+	ManageAttachedServers bool `json:"manage_attached_servers"`
+	SetDescription        bool `json:"set_description"`
+	SetName               bool `json:"set_name"`
+	SetNetworkInfo        bool `json:"set_network_info"`
 	Show                  bool `json:"show"`
 }
 
@@ -117,26 +117,26 @@ type RolePerm struct {
 	Clone          bool `json:"clone"`
 	Create         bool `json:"create"`
 	Delete         bool `json:"delete"`
-	ManageUsers    bool `json:"manageuser"`
+	ManageUsers    bool `json:"manage_users"`
 	Modify         bool `json:"modify"`
-	SetDescription bool `json:"setdescription"`
-	SetName        bool `json:"setname"`
+	SetDescription bool `json:"set_description"`
+	SetName        bool `json:"set_name"`
 	Show           bool `json:"show"`
 }
 
 type ServerPerm struct {
-	AccessKVMConsole bool `json:"accesskvmconsole"`
-	AssignIP         bool `json:"assignip"`
+	AccessKVMConsole bool `json:"access_kvm_console"`
+	AssignIP         bool `json:"assign_ip"`
 	Clone            bool `json:"clone"`
 	Create           bool `json:"create"`
 	Delete           bool `json:"delete"`
-	ManageDVD        bool `json:"managedvd"`
-	ManageSnapshot   bool `json:"managesnapshot"`
+	ManageDVD        bool `json:"manage_dvd"`
+	ManageSnapshot   bool `json:"manage_snapshot"`
 	Reinstall        bool `json:"reinstall"`
 	Resize           bool `json:"resize"`
 	Restart          bool `json:"restart"`
-	SetDescription   bool `json:"setdescription"`
-	SetName          bool `json:"setname"`
+	SetDescription   bool `json:"set_description"`
+	SetName          bool `json:"set_name"`
 	Show             bool `json:"show"`
 	Shutdown         bool `json:"shutdown"`
 	Start            bool `json:"start"`
@@ -146,10 +146,10 @@ type SharedStoragePerm struct {
 	Access                bool `json:"access"`
 	Create                bool `json:"create"`
 	Delete                bool `json:"delete"`
-	ManageAttachedServers bool `json:"manageattachedserver"`
+	ManageAttachedServers bool `json:"manage_attached_servers"`
 	Resize                bool `json:"resize"`
-	SetDescription        bool `json:"setdescription"`
-	SetName               bool `json:"setname"`
+	SetDescription        bool `json:"set_description"`
+	SetName               bool `json:"set_name"`
 	Show                  bool `json:"show"`
 }
 
@@ -158,24 +158,24 @@ type UsagePerm struct {
 }
 
 type UserPerm struct {
-	ChangeRole     bool `json:"changerole"`
+	ChangeRole     bool `json:"change_role"`
 	Create         bool `json:"create"`
 	Delete         bool `json:"delete"`
 	Disable        bool `json:"disable"`
 	Enable         bool `json:"enable"`
-	ManageAPI      bool `json:"manageapi"`
-	SetDescription bool `json:"setdescription"`
-	SetEmail       bool `json:"setemail"`
-	SetPassword    bool `json:"setpassword"`
+	ManageAPI      bool `json:"manage_api"`
+	SetDescription bool `json:"set_description"`
+	SetEmail       bool `json:"set_email"`
+	SetPassword    bool `json:"set_password"`
 	Show           bool `json:"show"`
 }
 
 type VPNPerm struct {
 	Create         bool `json:"create"`
 	Delete         bool `json:"delete"`
-	DownloadFile   bool `json:"downloadfile"`
-	SetDescription bool `json:"setdescription"`
-	SetName        bool `json:"setname"`
+	DownloadFile   bool `json:"download_file"`
+	SetDescription bool `json:"set_description"`
+	SetName        bool `json:"set_name"`
 	Show           bool `json:"show"`
 }
 
@@ -293,7 +293,7 @@ func (api *API) AssignRoleUsers(role_id string, user_ids []string) (*Role, error
 	req := struct {
 		Users []string `json:"users"`
 	}{user_ids}
-	err := api.Client.Post(url, &req, &result, http.StatusAccepted)
+	err := api.Client.Post(url, &req, &result, http.StatusCreated)
 	if err != nil {
 		return nil, err
 	}
