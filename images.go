@@ -8,7 +8,7 @@ type Image struct {
 	idField
 	ImageConfig
 	MinHddSize   int         `json:"min_hdd_size"`
-	Architecture *int        `json:"os_architecture"`
+	Architecture *int        `json:"architecture,omitempty"`
 	CloudPanelId string      `json:"cloudpanel_id,omitempty"`
 	CreationDate string      `json:"creation_date,omitempty"`
 	State        string      `json:"state,omitempty"`

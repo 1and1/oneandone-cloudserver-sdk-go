@@ -87,7 +87,9 @@ func get_random_appliance(max_disk_size int) ServerAppliance {
 	saps, _ := api.ListServerAppliances()
 	for {
 		i := rand.Intn(len(saps))
-		if saps[i].MinHddSize <= max_disk_size && saps[i].Type == "IMAGE" && !strings.Contains(saps[i].Name, "2008") {
+		if saps[i].MinHddSize <= max_disk_size &&
+			saps[i].Type == "IMAGE" &&
+			!strings.Contains(strings.ToLower(saps[i].OsFamily), "windows") {
 			return saps[i]
 		}
 	}
@@ -1046,6 +1048,7 @@ func TestListServerIpLoadBalancers(t *testing.T) {
 	}
 	if len(lbs) == 0 {
 		t.Errorf("No load balancer was assigned to the server's IP.")
+		return
 	}
 	if lbs[0].Id != ser_lb.Id {
 		t.Errorf("Wrong load balancer assigned.")

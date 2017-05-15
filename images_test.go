@@ -67,27 +67,12 @@ func TestCreateImage(t *testing.T) {
 	}
 	if test_image.Id == "" {
 		t.Errorf("Missing image ID.")
-		time.Sleep(60 * time.Second)
 	}
 	if !strings.Contains(test_image.Name, image_name) {
 		t.Errorf("Wrong image name.")
-		time.Sleep(60 * time.Second)
 	}
 	if test_image.Description != image_desc {
 		t.Errorf("Wrong image description.")
-		time.Sleep(60 * time.Second)
-	}
-	if test_image.ServerId != image_serv.Id {
-		t.Errorf("Wrong server ID in image '%s'.", test_image.Name)
-		time.Sleep(60 * time.Second)
-	}
-	if test_image.Frequency != img_freq {
-		t.Errorf("Wrong image frequency.")
-		time.Sleep(60 * time.Second)
-	}
-	if test_image.NumImages != img_numb {
-		t.Errorf("Wrong number of images in image '%s'.", test_image.Name)
-		time.Sleep(60 * time.Second)
 	}
 }
 
@@ -107,19 +92,19 @@ func TestGetImage(t *testing.T) {
 	if img.Type != test_image.Type {
 		t.Errorf("Wrong image type.")
 	}
-	if *img.Architecture != *test_image.Architecture {
+	if img.Architecture != nil && *img.Architecture != *test_image.Architecture {
 		t.Errorf("Wrong image architecture.")
 	}
 	if img.Description != test_image.Description {
 		t.Errorf("Wrong image description.")
 	}
-	if img.ServerId != test_image.ServerId {
+	if img.ServerId != image_serv.Id {
 		t.Errorf("Wrong server ID in image '%s'.", test_image.Name)
 	}
-	if img.Frequency != test_image.Frequency {
+	if img.Frequency != img_freq {
 		t.Errorf("Wrong image frequency.")
 	}
-	if img.NumImages != test_image.NumImages {
+	if img.NumImages != img_numb {
 		t.Errorf("Wrong number of images in image '%s'.", test_image.Name)
 	}
 }
