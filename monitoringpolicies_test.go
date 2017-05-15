@@ -9,12 +9,14 @@ import (
 )
 
 var (
-	set_mp       sync.Once
-	test_mp_name string
-	test_mp_desc string
-	test_mp_mail string
-	test_mp      *MonitoringPolicy
-	mp_request   MonitoringPolicy
+	set_mp           sync.Once
+	test_mp_name     string
+	test_mp_desc     string
+	test_mp_mail     string
+	test_mp_srv_id   string
+	test_mp_srv_name string
+	test_mp          *MonitoringPolicy
+	mp_request       MonitoringPolicy
 )
 
 const (
@@ -308,7 +310,7 @@ func TestAttachMonitoringPolicyServers(t *testing.T) {
 	set_mp.Do(set_monitoring_policy)
 
 	fmt.Printf("Attaching servers to monitoring policy '%s'...\n", test_mp.Name)
-	sync_server.Do(func() { deploy_test_server(false) })
+	sync_server.Do(func() { deploy_test_server(true) })
 
 	servers := []string{test_server.Id}
 	mp, err := api.AttachMonitoringPolicyServers(test_mp.Id, servers)
@@ -322,42 +324,48 @@ func TestAttachMonitoringPolicyServers(t *testing.T) {
 
 	if len(mp.Servers) != 1 {
 		t.Errorf("Found no server attached to the monitoring policy.")
+		return
 	}
 	if mp.Servers[0].Id != test_server.Id {
 		t.Errorf("Wrong server IP attached to the monitoring policy.")
 	}
 	test_mp = mp
+	test_mp_srv_id = mp.Servers[0].Id
+	test_mp_srv_name = mp.Servers[0].Name
 }
 
 func TestGetMonitoringPolicyServer(t *testing.T) {
 	set_mp.Do(set_monitoring_policy)
 
 	fmt.Printf("Getting server identity attached to monitoring policy '%s'...\n", test_mp.Name)
-	mp_ser, err := api.GetMonitoringPolicyServer(test_mp.Id, test_mp.Servers[0].Id)
+	mp_ser, err := api.GetMonitoringPolicyServer(test_mp.Id, test_mp_srv_id)
 
 	if err != nil {
 		t.Errorf("GetMonitoringPolicyServer failed. Error: " + err.Error())
+		return
 	}
-	if mp_ser.Id != test_mp.Servers[0].Id {
+	if mp_ser.Id != test_mp_srv_id {
 		t.Errorf("Wrong ID of the server attached to monitoring policy '%s'.", test_mp.Name)
 	}
-	if mp_ser.Name != test_mp.Servers[0].Name {
+	if mp_ser.Name != test_mp_srv_name {
 		t.Errorf("Wrong server name attached to monitoring policy '%s'.", test_mp.Name)
 	}
 }
 
 func TestListMonitoringPolicyServers(t *testing.T) {
 	set_mp.Do(set_monitoring_policy)
-	sync_server.Do(func() { deploy_test_server(false) })
+	sync_server.Do(func() { deploy_test_server(true) })
 
 	fmt.Printf("Listing servers attached to monitoring policy '%s'...\n", test_mp.Name)
 	mp_srvs, err := api.ListMonitoringPolicyServers(test_mp.Id)
 
 	if err != nil {
 		t.Errorf("ListMonitoringPolicyServers failed. Error: " + err.Error())
+		return
 	}
-	if len(mp_srvs) != 1 {
+	if len(mp_srvs) == 0 {
 		t.Errorf("Wrong number of servers attached to monitoring policy '%s'.", test_mp.Name)
+		return
 	}
 	if mp_srvs[0].Id != test_server.Id {
 		t.Errorf("Wrong server attached to monitoring policy '%s'.", test_mp.Name)
@@ -366,13 +374,14 @@ func TestListMonitoringPolicyServers(t *testing.T) {
 
 func TestRemoveMonitoringPolicyServer(t *testing.T) {
 	set_mp.Do(set_monitoring_policy)
-	sync_server.Do(func() { deploy_test_server(false) })
+	sync_server.Do(func() { deploy_test_server(true) })
 
 	fmt.Printf("Removing server attached to monitoring policy '%s'...\n", test_mp.Name)
 	mp, err := api.RemoveMonitoringPolicyServer(test_mp.Id, test_server.Id)
 
 	if err != nil {
 		t.Errorf("RemoveMonitoringPolicyServer failed. Error: " + err.Error())
+		return
 	}
 
 	api.WaitForState(mp, "ACTIVE", 30, 60)
@@ -425,16 +434,18 @@ func TestModifyMonitoringPolicyPort(t *testing.T) {
 	mp_port.AlertIf = port_responding
 	mp_port.EmailNotification = false
 
-	test_mp, err = api.ModifyMonitoringPolicyPort(test_mp.Id, mp_port.Id, mp_port)
-	if err != nil {
+	mp, err := api.ModifyMonitoringPolicyPort(test_mp.Id, mp_port.Id, mp_port)
+	if mp == nil {
 		t.Errorf("ModifyMonitoringPolicyPort failed. Error: " + err.Error())
+		return
 	}
-	if test_mp.Ports[0].AlertIf != port_responding {
+	if mp.Ports[0].AlertIf != port_responding {
 		t.Errorf("Unable to modify alert_if field in the monitoring policy port.")
 	}
-	if test_mp.Ports[0].EmailNotification {
+	if mp.Ports[0].EmailNotification {
 		t.Errorf("Unable to modify email notification state in the monitoring policy port.")
 	}
+	test_mp = mp
 }
 
 func TestAddMonitoringPolicyPorts(t *testing.T) {
@@ -460,10 +471,10 @@ func TestAddMonitoringPolicyPorts(t *testing.T) {
 	if err != nil {
 		t.Errorf("AddMonitoringPolicyPorts failed. Error: " + err.Error())
 	} else {
-		api.WaitForState(mp, "ACTIVE", 30, 60)
+		api.WaitForState(mp, "ACTIVE", 60, 60)
 	}
-	mp, _ = api.GetMonitoringPolicy(mp.Id)
-	if len(mp.Ports) != 3 {
+	mp, _ = api.GetMonitoringPolicy(test_mp.Id)
+	if mp == nil || len(mp.Ports) != 3 {
 		t.Errorf("Unable to add ports to monitoring policy '%s'.\n", test_mp.Name)
 	}
 }
@@ -493,11 +504,12 @@ func TestDeleteMonitoringPort(t *testing.T) {
 		t.Errorf("DeleteMonitoringPolicyPort failed. Error: " + err.Error())
 	}
 
-	api.WaitForState(mp, "ACTIVE", 30, 60)
+	api.WaitForState(mp, "ACTIVE", 60, 60)
 	mp, err = api.GetMonitoringPolicy(mp.Id)
 
 	if err != nil {
 		t.Errorf("Deleting port from the monitoring policy failed.")
+		return
 	}
 	if len(mp.Ports) != 2 {
 		t.Errorf("Port not deleted from the monitoring policy.")
@@ -517,6 +529,7 @@ func TestGetMonitoringPolicyProcess(t *testing.T) {
 
 	if err != nil {
 		t.Errorf("GetMonitoringPolicyProcess failed. Error: " + err.Error())
+		return
 	}
 	if mp_process.Id != test_mp.Processes[0].Id {
 		t.Errorf("Wrong process ID.")
@@ -540,21 +553,24 @@ func TestModifyMonitoringPolicyProcess(t *testing.T) {
 
 	if err != nil {
 		t.Errorf("GetMonitoringPolicyProcess failed. Error: " + err.Error())
+		return
 	}
 
 	mp_process.AlertIf = process_running
 	mp_process.EmailNotification = true
 
-	test_mp, err = api.ModifyMonitoringPolicyProcess(test_mp.Id, mp_process.Id, mp_process)
+	mp, err := api.ModifyMonitoringPolicyProcess(test_mp.Id, mp_process.Id, mp_process)
 	if err != nil {
 		t.Errorf("ModifyMonitoringPolicyProcess failed. Error: " + err.Error())
+		return
 	}
-	if test_mp.Processes[0].AlertIf != process_running {
+	if mp.Processes[0].AlertIf != process_running {
 		t.Errorf("Unable to modify alert_if field in the monitoring policy process.")
 	}
-	if !test_mp.Processes[0].EmailNotification {
+	if !mp.Processes[0].EmailNotification {
 		t.Errorf("Unable to modify email notification state in the monitoring policy process.")
 	}
+	test_mp = mp
 }
 
 func TestAddMonitoringPolicyProcesses(t *testing.T) {
@@ -578,10 +594,10 @@ func TestAddMonitoringPolicyProcesses(t *testing.T) {
 	if err != nil {
 		t.Errorf("AddMonitoringPolicyProcesses failed. Error: " + err.Error())
 	} else {
-		api.WaitForState(mp, "ACTIVE", 30, 60)
+		api.WaitForState(mp, "ACTIVE", 60, 60)
 	}
-	mp, _ = api.GetMonitoringPolicy(mp.Id)
-	if len(mp.Processes) != 3 {
+	mp, _ = api.GetMonitoringPolicy(test_mp.Id)
+	if mp == nil || len(mp.Processes) != 3 {
 		t.Errorf("Unable to add processes to monitoring policy '%s'.\n", test_mp.Name)
 	}
 }
@@ -594,6 +610,7 @@ func TestListMonitoringPolicyProcesses(t *testing.T) {
 
 	if err != nil {
 		t.Errorf("ListMonitoringPolicyProcesses failed. Error: " + err.Error())
+		return
 	}
 	if len(mp_processes) != 3 {
 		t.Errorf("Wrong number of processes found in monitoring policy '%s'.", test_mp.Name)
@@ -604,6 +621,10 @@ func TestDeleteMonitoringProcess(t *testing.T) {
 	set_mp.Do(set_monitoring_policy)
 
 	mp_processes, _ := api.ListMonitoringPolicyProcesses(test_mp.Id)
+	if len(mp_processes) == 0 {
+		t.Errorf("No monitoring policy process found.")
+		return
+	}
 	fmt.Printf("Deleting process '%s' from monitoring policy '%s'...\n", mp_processes[0].Id, test_mp.Name)
 	mp, err := api.DeleteMonitoringPolicyProcess(test_mp.Id, mp_processes[0].Id)
 
@@ -612,7 +633,7 @@ func TestDeleteMonitoringProcess(t *testing.T) {
 	}
 
 	api.WaitForState(mp, "ACTIVE", 60, 60)
-	mp, err = api.GetMonitoringPolicy(mp.Id)
+	mp, err = api.GetMonitoringPolicy(test_mp.Id)
 
 	if err != nil {
 		t.Errorf("Deleting process from the monitoring policy failed.")
@@ -645,8 +666,8 @@ func TestUpdateMonitoringPolicy(t *testing.T) {
 	if err != nil {
 		t.Errorf("UpdateMonitoringPolicy failed. Error: " + err.Error())
 	} else {
-		api.WaitForState(mp, "ACTIVE", 30, 30)
-		mp, _ = api.GetMonitoringPolicy(mp.Id)
+		api.WaitForState(mp, "ACTIVE", 60, 30)
+		mp, _ = api.GetMonitoringPolicy(test_mp.Id)
 		if mp.Name != new_name {
 			t.Errorf("Failed to update monitoring policy name.")
 		}
