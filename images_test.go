@@ -15,11 +15,11 @@ var (
 	image_desc string
 	test_image *Image
 	image_serv *Server
+	img_numb = 1
 )
 
 const (
 	img_freq = "WEEKLY"
-	img_numb = 1
 )
 
 // Helper functions
@@ -29,12 +29,12 @@ func create_image(ser_id string) *Image {
 	ri := rand.Intn(1000)
 	image_name = fmt.Sprintf("TestServerImage_%d", ri)
 	image_desc = fmt.Sprintf("TestServerImage_%d description", ri)
-	req := ImageConfig{
+	req := ImageRequest{
 		Name:        image_name,
 		Description: image_desc,
 		ServerId:    ser_id,
 		Frequency:   img_freq,
-		NumImages:   img_numb,
+		NumImages:   Int2Pointer(img_numb),
 	}
 	fmt.Printf("Creating image '%s'...\n", image_name)
 	img_id, img, err := api.CreateImage(&req)
@@ -104,7 +104,7 @@ func TestGetImage(t *testing.T) {
 	if img.Frequency != img_freq {
 		t.Errorf("Wrong image frequency.")
 	}
-	if img.NumImages != img_numb {
+	if *img.NumImages != img_numb {
 		t.Errorf("Wrong number of images in image '%s'.", test_image.Name)
 	}
 }
@@ -155,6 +155,17 @@ func TestListImages(t *testing.T) {
 	}
 	if imgs[0].Name != test_image.Name {
 		t.Errorf("Search parameter failed.")
+	}
+}
+
+func TestListImageOs(t *testing.T) {
+	fmt.Println("Listing all image Operating Systems...")
+	imgOses, err := api.ListImageOs()
+	if err != nil {
+		t.Errorf("ListImageOs failed. Error: " + err.Error())
+	}
+	if len(imgOses) == 0 {
+		t.Errorf("No image OS found.")
 	}
 }
 
