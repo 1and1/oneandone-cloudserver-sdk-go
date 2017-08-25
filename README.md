@@ -1,8 +1,8 @@
 # 1&amp;1  Cloudserver Go SDK
 
-The 1&amp;1  Go SDK is a Go library designed for interaction with the 1&amp;1  cloud platform over the REST API.
+The 1&amp;1  Go SDK is a Go library designed for interaction with the 1&amp;1  cloud platform over the REST API. 
 
-This guide contains instructions on getting started with the library and automating various management tasks available through the 1&amp;1  Cloud Panel UI.
+This guide contains instructions on getting started with the library and automating various management tasks available through the 1&amp;1  Cloud Panel UI. For more information on the 1&amp;1  Cloudserver Go SDK see the [1&1 Community Portal](https://www.1and1.com/cloud-community/).
 
 ## Table of Contents
 
