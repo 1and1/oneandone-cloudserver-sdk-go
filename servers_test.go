@@ -12,17 +12,19 @@ import (
 )
 
 var (
-	set_server  sync.Once
-	set_dvd     sync.Once
-	dvd_iso_id  string
-	server_id   string
-	server_name string
-	ser_app_id  string
-	server_ip   *ServerIp
-	server_hdd  *Hdd
-	server      *Server
-	ser_pn      *PrivateNetwork
-	ser_lb      *LoadBalancer
+	set_server       sync.Once
+	set_dvd          sync.Once
+	dvd_iso_id       string
+	server_id        string
+	server_name      string
+	ser_app_id       string
+	server_ip        *ServerIp
+	server_hdd       *Hdd
+	server           *Server
+	ser_pn           *PrivateNetwork
+	ser_lb           *LoadBalancer
+	baremetalModelId string
+	recoveryImageId  string
 )
 
 const (
@@ -83,14 +85,24 @@ func get_random_datacenterID() string {
 }
 
 func get_random_appliance(max_disk_size int) ServerAppliance {
-	rand.Seed(time.Now().UnixNano())
 	saps, _ := api.ListServerAppliances()
+	for _, sapp := range saps {
+		if sapp.MinHddSize <= max_disk_size &&
+			sapp.Type == "IMAGE" &&
+			strings.Contains(strings.ToLower(sapp.Os), "centos") {
+			return sapp
+		}
+	}
+	return saps[0]
+}
+
+func get_random_recoveryImage() RecoveryAppliance {
+	rand.Seed(time.Now().UnixNano())
+	raps, _ := api.ListRecoveryAppliances()
 	for {
-		i := rand.Intn(len(saps))
-		if saps[i].MinHddSize <= max_disk_size &&
-			saps[i].Type == "IMAGE" &&
-			!strings.Contains(strings.ToLower(saps[i].OsFamily), "windows") {
-			return saps[i]
+		i := rand.Intn(len(raps))
+		if !strings.Contains(strings.ToLower(raps[i].Os.Family), "windows") {
+			return raps[i]
 		}
 	}
 }
@@ -115,6 +127,7 @@ func create_test_server(power_on bool) (string, *Server, error) {
 		ApplianceId:        ser_app_id,
 		MonitoringPolicyId: mp.Id,
 		PowerOn:            power_on,
+		ServerType:         "cloud",
 		Hardware: Hardware{
 			Vcores:            v_cores,
 			CoresPerProcessor: c_per_pr,
@@ -133,12 +146,17 @@ func create_test_server(power_on bool) (string, *Server, error) {
 
 func load_server_dvd(ser_id string) {
 	dvds, _ := api.ListDvdIsos()
-	rand.Seed(time.Now().UnixNano())
-	i := rand.Intn(len(dvds))
+	var dvd = DvdIso{}
 
-	fmt.Printf("Loading dvd '%s' in server '%s' virtula drive...\n", dvds[i].Name, server.Name)
+	for _, itm := range dvds {
+		if strings.Contains(strings.ToLower(itm.Os), "centos") {
+			dvd = itm
+		}
+	}
 
-	srv, err := api.LoadServerDvd(ser_id, dvds[i].Id)
+	fmt.Printf("Loading dvd '%s' in server '%s' virtula drive...\n", dvd.Name, server.Name)
+
+	srv, err := api.LoadServerDvd(ser_id, dvd.Id)
 
 	if err != nil {
 		fmt.Printf("Loading server's dvd failed. Error: " + err.Error())
@@ -148,7 +166,7 @@ func load_server_dvd(ser_id string) {
 	for srv.Dvd == nil || srv.Status.Percent != 0 {
 		srv = wait_for_action_done(srv, 10, 90)
 	}
-	dvd_iso_id = dvds[i].Id
+	dvd_iso_id = dvd.Id
 	server = srv
 }
 
@@ -217,7 +235,7 @@ func TestCreateServerEx(t *testing.T) {
 }
 
 func TestListServers(t *testing.T) {
-	set_server.Do(setup_server)
+	//set_server.Do(setup_server)
 	fmt.Println("Listing all servers...")
 
 	res, err := api.ListServers()
@@ -265,6 +283,56 @@ func TestListServers(t *testing.T) {
 		t.Errorf("Search parameter failed.")
 	}
 	if res[0].Name != server_name {
+		t.Errorf("Search parameter failed.")
+	}
+}
+
+func TestListBaremetalModel(t *testing.T) {
+	fmt.Println("Listing all baremetal models...")
+
+	res, err := api.ListBaremetalModels()
+	if err != nil {
+		t.Errorf("ListBaremetalModels failed. Error: " + err.Error())
+	}
+	if len(res) == 0 {
+		t.Errorf("No baremetal model found.")
+	}
+
+	baremetalModelId = res[0].Id
+
+	res, err = api.ListBaremetalModels(1, 2, "name", "", "id,name")
+
+	if err != nil {
+		t.Errorf("ListBaremetalModels with parameter options failed. Error: " + err.Error())
+		return
+	}
+	if len(res) == 0 {
+		t.Errorf("No baremetal model found.")
+	}
+	if len(res) > 2 {
+		t.Errorf("Wrong number of objects per page.")
+	}
+	if res[0].Hardware != nil {
+		t.Errorf("Filtering parameters failed.")
+	}
+	if res[0].Name == "" {
+		t.Errorf("Filtering parameters failed.")
+	}
+
+	// Test for error response
+	res, err = api.ListBaremetalModels(0, 0, true, "name", "")
+	if res != nil || err == nil {
+		t.Errorf("ListBaremetalModels failed to handle incorrect argument type.")
+	}
+
+	res, err = api.ListBaremetalModels(0, 0, "", "BMC", "")
+
+	if err != nil {
+		t.Errorf("ListBaremetalModels with parameter options failed. Error: " + err.Error())
+		return
+	}
+
+	if !strings.Contains(res[0].Name, "BMC") {
 		t.Errorf("Search parameter failed.")
 	}
 }
@@ -327,6 +395,19 @@ func TestGetServer(t *testing.T) {
 	}
 	if srv.Id != server_id {
 		t.Errorf("Wrong server ID.")
+	}
+}
+
+func TestGetBaremetalModel(t *testing.T) {
+	fmt.Println("Getting baremetal model...")
+	bmm, err := api.GetBaremetalModel(baremetalModelId)
+
+	if err != nil {
+		t.Errorf("GetBaremetalModel failed. Error: " + err.Error())
+		return
+	}
+	if bmm.Id != baremetalModelId {
+		t.Errorf("Wrong baremetal model ID.")
 	}
 }
 
@@ -401,6 +482,30 @@ func TestRebootServer(t *testing.T) {
 		if err != nil {
 			t.Errorf("Rebooting the server using '%s' method failed. Error:  %s", method, err.Error())
 		}
+	}
+}
+
+func TestRecoveryRebootServer(t *testing.T) {
+	set_server.Do(setup_server)
+
+	fmt.Print("Rebooting the server using recovery boot")
+	srv, err := api.RecoveryRebootServer(server_id, false, get_random_recoveryImage().Id)
+
+	if err != nil {
+		t.Errorf("Rebooting the server using recovery boot. Error: %s", err.Error())
+		return
+	}
+
+	err = api.WaitForState(srv, "REBOOTING", 10, 60)
+
+	if err != nil {
+		t.Errorf("Rebooting the server using recovery boot. Error:  %s", err.Error())
+	}
+
+	err = api.WaitForState(srv, "POWERED_ON", 20, 60)
+
+	if err != nil {
+		t.Errorf("Rebooting the server using recovery boot. Error:  %s", err.Error())
 	}
 }
 
@@ -558,6 +663,7 @@ func TestResizeServerHdd(t *testing.T) {
 	hdds, _ := api.ListServerHdds(server_id)
 
 	fmt.Println("Resizing the server's HDD...")
+	time.Sleep(10000)
 	srv, err := api.ResizeServerHdd(server_id, hdds[0].Id, 50)
 
 	if err != nil {
@@ -590,6 +696,7 @@ func TestAddServerHdds(t *testing.T) {
 		},
 	}
 	fmt.Println("Adding a HDD to the server...")
+	time.Sleep(10000)
 	srv, err := api.AddServerHdds(server_id, &hdds)
 
 	if err != nil {
@@ -623,6 +730,7 @@ func TestDeleteServerHdd(t *testing.T) {
 	set_server.Do(setup_server)
 
 	fmt.Println("Deleting the server's HDD...")
+	time.Sleep(10000)
 	srv, err := api.DeleteServerHdd(server_id, server_hdd.Id)
 
 	if err != nil {
@@ -665,6 +773,9 @@ func TestReinstallServerImage(t *testing.T) {
 			fp_id = fp.Id
 			break
 		}
+	}
+	if fp_id == "" {
+		fp_id = fps[0].Id
 	}
 	fmt.Printf("Reinstalling the server to '%s'...\n", sap.Name)
 	srv, err := api.ReinstallServerImage(server_id, sap.Id, "", fp_id)
@@ -888,6 +999,7 @@ func TestDeleteServerIp(t *testing.T) {
 			}
 		}
 	}
+	time.Sleep(10000)
 	ip_no := len(server.Ips)
 	for i := 1; i < ip_no; i++ {
 		keep_ip := i%2 == 0
@@ -919,8 +1031,9 @@ func TestDeleteServerIp(t *testing.T) {
 
 func TestAssignServerPrivateNetwork(t *testing.T) {
 	set_server.Do(setup_server)
+	time.Sleep(10000)
 	ser_pn = create_private_netwok()
-
+	time.Sleep(10000)
 	fmt.Println("Assigning the private network to the server...")
 	srv, err := api.AssignServerPrivateNetwork(server_id, ser_pn.Id)
 
