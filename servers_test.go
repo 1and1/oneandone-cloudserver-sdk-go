@@ -566,6 +566,13 @@ func TestEjectServerDvd(t *testing.T) {
 	set_server.Do(setup_server)
 	set_dvd.Do(func() { load_server_dvd(server_id) })
 
+	srvr, err := api.GetServer(server_id)
+	if err != nil {
+		t.Errorf("get server failed. Error: " + err.Error())
+	}
+	api.WaitForState(srvr, "POWERED_ON", 10, 90)
+
+	time.Sleep(180 * time.Second)
 	fmt.Printf("Ejecting server '%s' virtual dvd drive...\n", server.Name)
 	srv, err := api.EjectServerDvd(server_id)
 
@@ -663,7 +670,12 @@ func TestResizeServerHdd(t *testing.T) {
 	hdds, _ := api.ListServerHdds(server_id)
 
 	fmt.Println("Resizing the server's HDD...")
-	time.Sleep(10000)
+	srvr, err := api.GetServer(server_id)
+	if err != nil {
+		t.Errorf("get server failed. Error: " + err.Error())
+	}
+	api.WaitForState(srvr, "POWERED_ON", 10, 90)
+	time.Sleep(120 * time.Second)
 	srv, err := api.ResizeServerHdd(server_id, hdds[0].Id, 50)
 
 	if err != nil {
@@ -730,7 +742,7 @@ func TestDeleteServerHdd(t *testing.T) {
 	set_server.Do(setup_server)
 
 	fmt.Println("Deleting the server's HDD...")
-	time.Sleep(10000)
+	time.Sleep(30 * time.Second)
 	srv, err := api.DeleteServerHdd(server_id, server_hdd.Id)
 
 	if err != nil {
@@ -738,6 +750,8 @@ func TestDeleteServerHdd(t *testing.T) {
 		return
 	}
 	srv = wait_for_action_done(srv, 10, 90)
+	time.Sleep(30 * time.Second)
+	srv, err = api.GetServer(server_id)
 	if len(srv.Hardware.Hdds) != 1 {
 		t.Errorf("Wrong number of the server's hard disks. The HDD was not deleted.")
 	}
@@ -775,7 +789,7 @@ func TestReinstallServerImage(t *testing.T) {
 		}
 	}
 	if fp_id == "" {
-		fp_id = fps[0].Id
+		fp_id = fps[len(fps)-1].Id
 	}
 	fmt.Printf("Reinstalling the server to '%s'...\n", sap.Name)
 	srv, err := api.ReinstallServerImage(server_id, sap.Id, "", fp_id)
@@ -991,49 +1005,43 @@ func TestDeleteServerIp(t *testing.T) {
 
 	if len(server.Ips) <= 1 {
 		for i := 0; i < 2; i++ {
-			time.Sleep(time.Second)
+			time.Sleep(10 * time.Second)
 			s, e := api.AssignServerIp(server_id, "IPV4")
 			if s != nil && e == nil {
 				s = wait_for_action_done(s, 10, 30)
 				server = s
+				time.Sleep(120 * time.Second)
 			}
 		}
 	}
-	time.Sleep(10000)
 	ip_no := len(server.Ips)
-	for i := 1; i < ip_no; i++ {
+	for i := 1; i < ip_no-1; i++ {
 		keep_ip := i%2 == 0
 		fmt.Printf("Deleting the server's IP '%s' (keep_ip = %s)...\n", server.Ips[i].Ip, strconv.FormatBool(keep_ip))
-		srv, err := api.DeleteServerIp(server_id, server.Ips[i].Id, keep_ip)
-
-		if err != nil {
-			t.Errorf("DeleteServerIp failed. Error: " + err.Error())
-			return
-		}
-		if len(srv.Ips) != ip_no-i {
-			t.Errorf("IP address '%s' is not removed from the server.", server.Ips[i].Ip)
-		}
+		api.DeleteServerIp(server_id, server.Ips[i].Id, keep_ip)
+		time.Sleep(180 * time.Second)
 		ip, _ := api.GetPublicIp(server.Ips[i].Id)
 		if keep_ip {
 			if ip == nil {
 				t.Errorf("Failed to keep public IP '%s' when removed from server.", server.Ips[i].Ip)
 			} else {
 				fmt.Printf("Deleting IP address '%s' after removing from the server...\n", server.Ips[i].Ip)
-				ip, err = api.DeletePublicIp(ip.Id)
+				api.DeletePublicIp(ip.Id)
 			}
 		} else if ip != nil {
 			t.Errorf("Failed to delete public IP '%s' when removed from server.", server.Ips[i].Ip)
 			fmt.Printf("Cleaning up. Deleting IP address '%s' directly...\n", server.Ips[i].Ip)
-			ip, err = api.DeletePublicIp(ip.Id)
+			api.DeletePublicIp(ip.Id)
 		}
 	}
 }
 
 func TestAssignServerPrivateNetwork(t *testing.T) {
 	set_server.Do(setup_server)
-	time.Sleep(10000)
+	time.Sleep(20000)
 	ser_pn = create_private_netwok()
-	time.Sleep(10000)
+
+	api.WaitForState(ser_pn, "ACTIVE", 10, 60)
 	fmt.Println("Assigning the private network to the server...")
 	srv, err := api.AssignServerPrivateNetwork(server_id, ser_pn.Id)
 
@@ -1041,14 +1049,22 @@ func TestAssignServerPrivateNetwork(t *testing.T) {
 		t.Errorf("AssignServerPrivateNetwork failed. Error: " + err.Error())
 		return
 	}
-	prn, _ := api.GetServerPrivateNetwork(server_id, ser_pn.Id)
+
+	api.WaitForState(ser_pn, "ACTIVE", 10, 90)
+	srv, err = api.GetServer(server_id)
+	if err != nil {
+		t.Errorf("get server failed. Error: " + err.Error())
+	}
+	api.WaitForState(srv, "POWERED_OFF", 10, 90)
 
 	if len(srv.PrivateNets) == 0 {
 		t.Errorf("The private network was not assigned to the server.")
 	} else if srv.PrivateNets[0].Id != ser_pn.Id {
 		t.Errorf("The private network was not assigned to the server.")
 	}
-	//	prn = wait_for_state(prn, 20, 30, "ACTIVE")
+
+	prn, _ := api.GetServerPrivateNetwork(server_id, ser_pn.Id)
+
 	api.WaitForState(prn, "ACTIVE", 10, 60)
 	ser_pn, _ = api.GetPrivateNetwork(prn.Id)
 }
@@ -1254,6 +1270,12 @@ func TestUnassignServerIpFirewallPolicy(t *testing.T) {
 func TestCloneServer(t *testing.T) {
 	set_server.Do(setup_server)
 
+	srvr, err := api.GetServer(server_id)
+	if err != nil {
+		t.Errorf("get server failed. Error: " + err.Error())
+	}
+	api.WaitForState(srvr, "POWERED_OFF", 10, 90)
+
 	fmt.Println("Cloning the server...")
 	new_name := server_name + "_Copy"
 	var dc_id string
@@ -1294,14 +1316,14 @@ func TestCloneServer(t *testing.T) {
 func TestDeleteServer(t *testing.T) {
 	set_server.Do(setup_server)
 
+	time.Sleep(120 * time.Second)
 	srv, err := api.DeleteServer(server_id, true)
-	fmt.Printf("Deleting server '%s', keeping server's IP '%s'...\n", srv.Name, srv.Ips[0].Ip)
-	ip_id := srv.Ips[0].Id
-
 	if err != nil {
 		t.Errorf("DeleteServer server failed. Error: " + err.Error())
 		return
 	}
+	fmt.Printf("Deleting server '%s', keeping server's IP '%s'...\n", srv.Name, srv.Ips[0].Ip)
+	ip_id := srv.Ips[0].Id
 
 	err = api.WaitUntilDeleted(srv)
 
