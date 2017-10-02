@@ -26,6 +26,7 @@ This guide contains instructions on getting started with the library and automat
   - [Roles](#roles)
   - [Usages](#usages)
   - [Server Appliances](#server-appliances)
+  - [Recovery Images](#recovery-images)
   - [DVD ISO](#dvd-iso)
   - [Ping](#ping)
   - [Pricing](#pricing)
