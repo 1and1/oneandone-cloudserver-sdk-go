@@ -33,6 +33,7 @@ func main() {
 		Description: "Example server description.",
 		ApplianceId: sa.Id,
 		PowerOn:     true,
+		ServerType:  "cloud",
 		Hardware: oneandone.Hardware{
 			Vcores:            1,
 			CoresPerProcessor: 1,
