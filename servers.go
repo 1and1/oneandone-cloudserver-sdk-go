@@ -36,7 +36,7 @@ type Hardware struct {
 	Ram               float32 `json:"ram"`
 	Hdds              []Hdd   `json:"hdds,omitempty"`
 	FixedInsSizeId    string  `json:"fixed_instance_size_id,omitempty"`
-	BaremetalModelId  *interface{}  `json:"baremetal_model_id,omitempty"`
+	BaremetalModelId  interface{}  `json:"baremetal_model_id,omitempty"`
 	ApiPtr
 }
 
