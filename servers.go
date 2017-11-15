@@ -11,7 +11,6 @@ type Server struct {
 	ApiPtr
 	Identity
 	descField
-	CloudPanelId  string           `json:"cloudpanel_id,omitempty"`
 	CreationDate  string           `json:"creation_date,omitempty"`
 	FirstPassword string           `json:"first_password,omitempty"`
 	ServerType    string           `json:"server_type,omitempty"`
