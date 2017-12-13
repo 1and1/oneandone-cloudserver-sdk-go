@@ -71,6 +71,7 @@ const (
 	serverPathSegment          = "servers"
 	serverAppliancePathSegment = "server_appliances"
 	sharedStoragePathSegment   = "shared_storages"
+	blockStoragePathSegment    = "block_storages"
 	usagePathSegment           = "usages"
 	userPathSegment            = "users"
 	vpnPathSegment             = "vpns"
