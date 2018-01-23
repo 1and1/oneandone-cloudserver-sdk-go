@@ -89,7 +89,7 @@ func get_random_appliance(max_disk_size int) ServerAppliance {
 		i := rand.Intn(len(saps))
 		if saps[i].MinHddSize <= max_disk_size &&
 			saps[i].Type == "IMAGE" &&
-			!strings.Contains(strings.ToLower(saps[i].OsFamily), "windows") {
+			!strings.Contains(strings.ToLower(saps[i].OsFamily), "windows") && strings.Contains(strings.ToLower(saps[i].Name), strings.ToLower("centos7")) {
 			return saps[i]
 		}
 	}

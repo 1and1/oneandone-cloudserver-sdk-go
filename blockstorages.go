@@ -9,8 +9,8 @@ type BlockStorageRequest struct {
 	Name         string `json:"name"`
 	Description  string `json:"description,omitempty"`
 	Size         *int   `json:"size"`
-	ServerID     string `json:"server,omitempty"`
-	DatacenterID string `json:"datacenter_id,omitempty"`
+	ServerId     string `json:"server,omitempty"`
+	DatacenterId string `json:"datacenter_id,omitempty"`
 }
 
 type BlockStorage struct {
@@ -26,8 +26,9 @@ type BlockStorage struct {
 }
 
 type BlockStorageServer struct {
-	Id   string `json:"id,omitempty"`
-	Name string `json:"name,omitempty"`
+	Id       string `json:"id,omitempty"`
+	ServerId string `json:"server,omitempty"`
+	Name     string `json:"name,omitempty"`
 }
 
 func (api *API) ListBlockStorages(args ...interface{}) ([]BlockStorage, error) {
@@ -49,7 +50,7 @@ func (api *API) ListBlockStorages(args ...interface{}) ([]BlockStorage, error) {
 func (api *API) GetBlockStorage(id string) (*BlockStorage, error) {
 	result := new(BlockStorage)
 	url := createUrl(api, blockStoragePathSegment, id)
-	err := api.Client.Get(url, &result, http.StatusCreated)
+	err := api.Client.Get(url, &result, http.StatusOK)
 	if err != nil {
 		return nil, err
 	}
@@ -64,19 +65,38 @@ func (api *API) GetBlockStorageServer(id string) (*BlockStorageServer, error) {
 	if err != nil {
 		return nil, err
 	}
-	// result.api = api
 	return result, nil
 }
 
 func (api *API) AddBlockStorageServer(blockStorageId string, serverId string) (*BlockStorage, error) {
 	result := new(BlockStorage)
-	req := BlockStorageServer{Id: serverId}
-	url := createUrl(api, blockStoragePathSegment, blockStorageId, "servers")
-	err := api.Client.Post(url, &req, &result, http.StatusAccepted)
+	req := BlockStorageServer{ServerId: serverId}
+	url := createUrl(api, blockStoragePathSegment, blockStorageId, "server")
+	err := api.Client.Post(url, &req, &result, http.StatusCreated)
 	if err != nil {
 		return nil, err
 	}
 	result.api = api
+	return result, nil
+}
+
+func (api *API) RemoveBlockStorageServer(blockStorageId string, serverId string) (*BlockStorage, error) {
+	result := new(BlockStorage)
+	blockStorage, err := api.GetBlockStorage(blockStorageId)
+
+	if err != nil {
+		return nil, err
+	}
+
+	req := BlockStorageServer{ServerId: serverId}
+	url := createUrl(api, blockStoragePathSegment, blockStorage.Id, "server")
+
+	err = api.Client.Delete(url, &req, &result, http.StatusOK)
+	if err != nil {
+		return nil, err
+	}
+	result.api = api
+
 	return result, nil
 }
 
