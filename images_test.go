@@ -15,7 +15,7 @@ var (
 	image_desc string
 	test_image *Image
 	image_serv *Server
-	img_numb = 1
+	img_numb   = 1
 )
 
 const (
