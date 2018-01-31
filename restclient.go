@@ -128,28 +128,6 @@ func (c *restClient) unmarshal(data []byte, result interface{}) error {
 	return nil
 }
 
-func isError(response *http.Response, expectedStatus int, err error) error {
-	if err != nil {
-		return err
-	}
-	if response != nil {
-		if response.StatusCode == expectedStatus {
-			// we got a response with the expected HTTP status code, hence no error
-			return nil
-		}
-		body, _ := ioutil.ReadAll(response.Body)
-		// extract the API's error message to be returned later
-		er_resp := new(errorResponse)
-		err = json.Unmarshal(body, er_resp)
-		if err != nil {
-			return err
-		}
-
-		return apiError{response.StatusCode, fmt.Sprintf("Type: %s; Message: %s", er_resp.Type, er_resp.Message)}
-	}
-	return errors.New("Generic error - no response from the REST API service.")
-}
-
 func createUrl(api *API, sections ...interface{}) string {
 	url := api.Endpoint
 	for _, section := range sections {
