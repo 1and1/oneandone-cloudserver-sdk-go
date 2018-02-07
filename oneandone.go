@@ -75,6 +75,9 @@ const (
 	sshkeyPathSegment            = "ssh_keys"
 	baremetalSegment             = "baremetal_models"
 	recoveryAppliancePathSegment = "recovery_appliances"
+	usagePathSegment             = "usages"
+	userPathSegment              = "users"
+	vpnPathSegment               = "vpns"
 )
 
 // Struct to hold the status of an API object.
