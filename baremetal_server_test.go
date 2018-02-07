@@ -36,7 +36,7 @@ func setup_baremetal_server() {
 		baremetal_server_id = b_srv.Id
 	}
 
-	err = api.WaitForState(b_srv, "POWERED_OFF", 10, 90)
+	err = api.WaitForState(b_srv, "POWERED_OFF", 20, 90)
 
 	if err != nil {
 		fmt.Printf("Error: %s", err.Error())
@@ -461,7 +461,7 @@ func TestDeleteBaremetalServerIp(t *testing.T) {
 		keep_ip := i%2 == 0
 		fmt.Printf("Deleting the baremetal_server's IP '%s' (keep_ip = %s)...\n", baremetal_server.Ips[i].Ip, strconv.FormatBool(keep_ip))
 		api.DeleteServerIp(baremetal_server_id, baremetal_server.Ips[i].Id, keep_ip)
-		time.Sleep(180 * time.Second)
+		time.Sleep(280 * time.Second)
 		ip, _ := api.GetPublicIp(baremetal_server.Ips[i].Id)
 		if keep_ip {
 			if ip == nil {
@@ -583,22 +583,6 @@ func TestGetBaremetalServerIpFirewallPolicy(t *testing.T) {
 	}
 	if fp.Id != fps[0].Id {
 		t.Errorf("Wrong firewall policy assigned to the baremetal_server's IP.")
-	}
-}
-
-func TestUnassignBaremetalServerIpFirewallPolicy(t *testing.T) {
-	set_baremetal_server.Do(setup_baremetal_server)
-	ips, _ := api.ListServerIps(baremetal_server_id)
-
-	fmt.Println("Unassigning the firewall policy from the baremetal_server's IP...")
-	b_srv, err := api.UnassignServerIpFirewallPolicy(baremetal_server_id, ips[0].Id)
-
-	if err != nil {
-		t.Errorf("UnassignServerIpFirewallPolicy failed. Error: " + err.Error())
-		return
-	}
-	if b_srv.Ips[0].Firewall != nil {
-		t.Errorf("Unassigning the firewall policy failed.")
 	}
 }
 

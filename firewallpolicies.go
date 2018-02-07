@@ -137,18 +137,6 @@ func (api *API) AddFirewallPolicyServerIps(fp_id string, ip_ids []string) (*Fire
 	return result, nil
 }
 
-// DELETE /firewall_policies/{id}/server_ips/{id}
-func (api *API) DeleteFirewallPolicyServerIp(fp_id string, ip_id string) (*FirewallPolicy, error) {
-	result := new(FirewallPolicy)
-	url := createUrl(api, firewallPolicyPathSegment, fp_id, "server_ips", ip_id)
-	err := api.Client.Delete(url, nil, &result, http.StatusAccepted)
-	if err != nil {
-		return nil, err
-	}
-	result.api = api
-	return result, nil
-}
-
 // GET /firewall_policies/{id}/rules
 func (api *API) ListFirewallPolicyRules(fp_id string) ([]FirewallPolicyRule, error) {
 	result := []FirewallPolicyRule{}

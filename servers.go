@@ -757,19 +757,6 @@ func (api *API) AssignServerIpFirewallPolicy(server_id string, ip_id string, fp_
 	return result, nil
 }
 
-// DELETE /servers/{server_id}/ips/{ip_id}/firewall_policy
-func (api *API) UnassignServerIpFirewallPolicy(server_id string, ip_id string) (*Server, error) {
-	result := new(Server)
-	url := createUrl(api, serverPathSegment, server_id, "ips", ip_id, "firewall_policy")
-	err := api.Client.Delete(url, nil, &result, http.StatusAccepted)
-	if err != nil {
-		return nil, err
-	}
-	result.api = api
-	result.decodeRaws()
-	return result, nil
-}
-
 // GET /servers/{id}/snapshots
 func (api *API) GetServerSnapshot(server_id string) (*ServerSnapshot, error) {
 	result := new(ServerSnapshot)

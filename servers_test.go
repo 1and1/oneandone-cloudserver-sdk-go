@@ -1251,22 +1251,6 @@ func TestGetServerIpFirewallPolicy(t *testing.T) {
 	}
 }
 
-func TestUnassignServerIpFirewallPolicy(t *testing.T) {
-	set_server.Do(setup_server)
-	ips, _ := api.ListServerIps(server_id)
-
-	fmt.Println("Unassigning the firewall policy from the server's IP...")
-	srv, err := api.UnassignServerIpFirewallPolicy(server_id, ips[0].Id)
-
-	if err != nil {
-		t.Errorf("UnassignServerIpFirewallPolicy failed. Error: " + err.Error())
-		return
-	}
-	if srv.Ips[0].Firewall != nil {
-		t.Errorf("Unassigning the firewall policy failed.")
-	}
-}
-
 func TestCloneServer(t *testing.T) {
 	set_server.Do(setup_server)
 
