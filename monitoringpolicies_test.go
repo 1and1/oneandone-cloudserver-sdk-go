@@ -146,9 +146,6 @@ func TestCreateMonitoringPolicy(t *testing.T) {
 	if !test_mp.Agent {
 		t.Errorf("Missing monitoring policy agent.")
 	}
-	if test_mp.CloudPanelId == "" {
-		t.Errorf("Missing cloud panel ID in monitoring policy '%s' data.", test_mp.Name)
-	}
 	if test_mp.Email != test_mp_mail {
 		t.Errorf("Wrong email of monitoring policy '%s'.", test_mp.Name)
 	}
