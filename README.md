@@ -1,8 +1,8 @@
 # 1&amp;1  Cloudserver Go SDK
 
-The 1&amp;1  Go SDK is a Go library designed for interaction with the 1&amp;1  cloud platform over the REST API.
+The 1&amp;1  Go SDK is a Go library designed for interaction with the 1&amp;1  cloud platform over the REST API. 
 
-This guide contains instructions on getting started with the library and automating various management tasks available through the 1&amp;1  Cloud Panel UI.
+This guide contains instructions on getting started with the library and automating various management tasks available through the 1&amp;1  Cloud Panel UI. For more information on the 1&amp;1  Cloudserver Go SDK see the [1&1 Community Portal](https://www.1and1.com/cloud-community/).
 
 ## Table of Contents
 
@@ -31,6 +31,8 @@ This guide contains instructions on getting started with the library and automat
   - [Ping](#ping)
   - [Pricing](#pricing)
   - [Data Centers](#data-centers)
+  - [Block Storages](#block-storages)
+  - [SSH Keys](#ssh-keys)
 - [Examples](#examples)
 - [Index](#index)
 
@@ -1611,6 +1613,115 @@ Here is another example of an alternative form of the list function that include
 **Retrieve a specific data center:**
 
 `datacenter, err := api.GetDatacenter(datacenter_id)`
+
+### Block Storages
+
+**List block storages:**
+
+`blcs, err := api.ListBlockStorages()`
+
+Alternatively, use the method with query parameters.
+
+`blcs, err := api.ListBlockStorages(page, per_page, sort, query, fields)`
+
+To paginate the list of block storages received in the response use `page` and `per_page` parameters. Set `per_page` to the number of block storages that will be shown in each page. `page` indicates the current page. When set to an integer value that is less or equal to zero, the parameters are ignored by the framework.
+
+To receive the list of block storages sorted in expected order pass a volume property (e.g. `"name"`) in `sort` parameter. Prefix the sorting attribute with `-` sign for sorting in descending order.
+
+Use `query` parameter to search for a string in the response and return only the volume instances that contain it.
+
+To retrieve a collection of block storages containing only the requested fields pass a list of comma separated properties (e.g. `"id,name,size"`) in `fields` parameter.
+
+If any of the parameters `sort`, `query` or `fields` is set to an empty string, it is ignored in the request.
+
+**Retrieve a block storage:**
+
+`blcs, err := api.GetBlockStorage(blcs_id)`
+
+
+**Create a block storage:**
+
+```
+request := oneandone.BlockStorageRequest {
+    Name: test_blcs_name, 
+    Description: test_blcs_desc,
+    Size: oneandone.Int2Pointer(size),
+    DatacenterId: datacenter_id,
+    ServerId: server_id
+  }
+  
+blcs_id, blcs, err := api.CreateBlockStorage(&request)
+
+```
+`Description` and `ServerId`are optional parameters.
+
+
+**Remove a block storage storage:**
+
+`blcs, err := api.DeleteBlockStorage(blcs_id)`
+
+
+**Add a server to a block storage:**
+
+`blcs, err := api.AddBlockStorageServer(blcs_id, server_id)`
+
+
+**Retrieve a block storage server:**
+
+`blcs_server, err := api.GetBlockStorageServer(blcs_id)`
+
+				
+**Remove a server from a block storage:**
+
+`blcs, err := api.RemoveBlockStorageServer(blcs_id, server_id)`
+
+### SSH Keys
+
+**List ssh keys:**
+
+`sk, err := api.ListSSHKeys()`
+
+Alternatively, use the method with query parameters.
+
+`sk, err := api.ListSSHKeys(page, per_page, sort, query, fields)`
+
+To paginate the list of ssh keys received in the response use `page` and `per_page` parameters. Set `per_page` to the number of ssh keys that will be shown in each page. `page` indicates the current page. When set to an integer value that is less or equal to zero, the parameters are ignored by the framework.
+
+To receive the list of ssh keys sorted in expected order pass a volume property (e.g. `"name"`) in `sort` parameter. Prefix the sorting attribute with `-` sign for sorting in descending order.
+
+Use `query` parameter to search for a string in the response and return only the volume instances that contain it.
+
+To retrieve a collection of ssh keys containing only the requested fields pass a list of comma separated properties (e.g. `"state,md5"`) in `fields` parameter.
+
+If any of the parameters `sort`, `query` or `fields` is set to an empty string, it is ignored in the request.
+
+**Retrieve an ssh key:**
+
+`sk, err := api.GetSSHKey(sk_id)`
+
+
+**Create an ssh key:**
+
+```
+request := oneandone.SSHKeyRequest {
+    Name: test_sk_name, 
+    Description: test_sk_desc,
+    PublicKey: pub_key
+  }
+  
+sk_id, sk, err := api.CreateSSHKey(&request)
+
+```
+
+
+**Rename an ssh key:**
+
+`sk, err := oneandone.RenameSSHKey(sk_id, new_name, new_desc)`
+
+
+**Remove an ssh key:**
+
+`sk, err := api.DeleteSSHKey(sk_id)`
 
 
 ## Examples
