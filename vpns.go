@@ -106,7 +106,7 @@ func (api *API) GetVPNConfigFile(filepath string, vpn_id string) (string, error)
 	}
 	filestring, err := base64.StdEncoding.DecodeString(result.Base64String)
 	d1 := []byte(filestring)
-	fileErr := ioutil.WriteFile(filepath+ ".zip", d1, 0644)
+	fileErr := ioutil.WriteFile(filepath+".zip", d1, 0644)
 	check(fileErr)
 
 	return result.Base64String, nil

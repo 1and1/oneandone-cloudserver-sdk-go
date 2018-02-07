@@ -71,9 +71,8 @@ const (
 	serverPathSegment            = "servers"
 	serverAppliancePathSegment   = "server_appliances"
 	sharedStoragePathSegment     = "shared_storages"
-	blockStoragePathSegment    = "block_storages"
-	sshkeyPathSegment          = "ssh_keys"
-
+	blockStoragePathSegment      = "block_storages"
+	sshkeyPathSegment            = "ssh_keys"
 	baremetalSegment             = "baremetal_models"
 	recoveryAppliancePathSegment = "recovery_appliances"
 )

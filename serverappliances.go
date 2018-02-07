@@ -10,7 +10,7 @@ type ServerAppliance struct {
 	Os                      string      `json:"os,omitempty"`
 	OsVersion               string      `json:"os_version,omitempty"`
 	Version                 string      `json:"version,omitempty"`
-	ServerTypeCompatibility []string      `json:"server_type_compatibility,omitempty"`
+	ServerTypeCompatibility []string    `json:"server_type_compatibility,omitempty"`
 	MinHddSize              int         `json:"min_hdd_size"`
 	Architecture            interface{} `json:"os_architecture"`
 	Licenses                interface{} `json:"licenses,omitempty"`

@@ -30,12 +30,12 @@ type Server struct {
 }
 
 type Hardware struct {
-	Vcores            int     `json:"vcore,omitempty"`
-	CoresPerProcessor int     `json:"cores_per_processor"`
-	Ram               float32 `json:"ram"`
-	Hdds              []Hdd   `json:"hdds,omitempty"`
-	FixedInsSizeId    string  `json:"fixed_instance_size_id,omitempty"`
-	BaremetalModelId  interface{}  `json:"baremetal_model_id,omitempty"`
+	Vcores            int         `json:"vcore,omitempty"`
+	CoresPerProcessor int         `json:"cores_per_processor"`
+	Ram               float32     `json:"ram"`
+	Hdds              []Hdd       `json:"hdds,omitempty"`
+	FixedInsSizeId    string      `json:"fixed_instance_size_id,omitempty"`
+	BaremetalModelId  interface{} `json:"baremetal_model_id,omitempty"`
 	ApiPtr
 }
 
@@ -143,7 +143,7 @@ type BaremetalHardware struct {
 	CoresPerProcessor int     `json:"cores_per_processor"`
 	Ram               float32 `json:"ram"`
 	Unit              string  `json:"unit,omitempty"`
-	Hdds              Hdd   `json:"hdds,omitempty"`
+	Hdds              Hdd     `json:"hdds,omitempty"`
 	ApiPtr
 }
 
