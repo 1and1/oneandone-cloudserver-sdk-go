@@ -208,28 +208,6 @@ func TestListFirewallPolicyServerIps(t *testing.T) {
 	}
 }
 
-func TestDeleteFirewallPolicyServerIp(t *testing.T) {
-	set_fp.Do(set_firewall_policy)
-	sync_server.Do(func() { deploy_test_server(false) })
-
-	fmt.Printf("Deleting server IP from firewall policy '%s'...\n", test_fp.Name)
-	fp, err := api.DeleteFirewallPolicyServerIp(test_fp.Id, test_server.Ips[0].Id)
-
-	if err != nil {
-		t.Errorf("DeleteFirewallPolicyServerIp failed. Error: " + err.Error())
-	}
-
-	api.WaitForState(fp, "ACTIVE", 10, 60)
-	fp, err = api.GetFirewallPolicy(fp.Id)
-
-	if err != nil {
-		t.Errorf("Deleting server IP from the firewall policy failed.")
-	}
-	if len(fp.ServerIps) > 0 {
-		t.Errorf("IP not deleted from the firewall policy.")
-	}
-}
-
 func TestGetFirewallPolicyRule(t *testing.T) {
 	set_fp.Do(set_firewall_policy)
 

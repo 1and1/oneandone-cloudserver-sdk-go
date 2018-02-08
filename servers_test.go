@@ -25,6 +25,7 @@ var (
 	ser_lb           *LoadBalancer
 	baremetalModelId string
 	recoveryImageId  string
+	sap              ServerAppliance
 )
 
 const (
@@ -117,7 +118,7 @@ func create_test_server(power_on bool) (string, *Server, error) {
 	server_name = fmt.Sprintf("TestServer_%d", rand.Intn(1000000))
 	fmt.Printf("Creating test server '%s'...\n", server_name)
 
-	sap := get_random_appliance(hdd_size)
+	sap = get_random_appliance(hdd_size)
 	ser_app_id = sap.Id
 	mp := get_default_mon_policy()
 
@@ -149,7 +150,7 @@ func load_server_dvd(ser_id string) {
 	var dvd = DvdIso{}
 
 	for _, itm := range dvds {
-		if strings.Contains(strings.ToLower(itm.Os), "centos") {
+		if strings.Contains(strings.ToLower(itm.Name), "centos 6") && itm.Architecture == sap.Architecture {
 			dvd = itm
 		}
 	}
@@ -164,7 +165,7 @@ func load_server_dvd(ser_id string) {
 	}
 
 	for srv.Dvd == nil || srv.Status.Percent != 0 {
-		srv = wait_for_action_done(srv, 10, 90)
+		srv = wait_for_action_done(srv, 20, 180)
 	}
 	dvd_iso_id = dvd.Id
 	server = srv
@@ -485,30 +486,6 @@ func TestRebootServer(t *testing.T) {
 	}
 }
 
-func TestRecoveryRebootServer(t *testing.T) {
-	set_server.Do(setup_server)
-
-	fmt.Print("Rebooting the server using recovery boot")
-	srv, err := api.RecoveryRebootServer(server_id, false, get_random_recoveryImage().Id)
-
-	if err != nil {
-		t.Errorf("Rebooting the server using recovery boot. Error: %s", err.Error())
-		return
-	}
-
-	err = api.WaitForState(srv, "REBOOTING", 10, 60)
-
-	if err != nil {
-		t.Errorf("Rebooting the server using recovery boot. Error:  %s", err.Error())
-	}
-
-	err = api.WaitForState(srv, "POWERED_ON", 20, 60)
-
-	if err != nil {
-		t.Errorf("Rebooting the server using recovery boot. Error:  %s", err.Error())
-	}
-}
-
 func TestRenameServer(t *testing.T) {
 	set_server.Do(setup_server)
 
@@ -780,7 +757,7 @@ func TestGetServerImage(t *testing.T) {
 func TestReinstallServerImage(t *testing.T) {
 	set_server.Do(setup_server)
 	sap := get_random_appliance(hdd_size)
-	fps, _ := api.ListFirewallPolicies(0, 0, "creation_date", sap.OsFamily, "id,name,default")
+	fps, _ := api.ListFirewallPolicies()
 	fp_id := ""
 	for _, fp := range fps {
 		if fp.DefaultPolicy == 1 {
@@ -788,6 +765,7 @@ func TestReinstallServerImage(t *testing.T) {
 			break
 		}
 	}
+
 	if fp_id == "" {
 		fp_id = fps[len(fps)-1].Id
 	}
@@ -1248,22 +1226,6 @@ func TestGetServerIpFirewallPolicy(t *testing.T) {
 	}
 	if fp.Id != fps[0].Id {
 		t.Errorf("Wrong firewall policy assigned to the server's IP.")
-	}
-}
-
-func TestUnassignServerIpFirewallPolicy(t *testing.T) {
-	set_server.Do(setup_server)
-	ips, _ := api.ListServerIps(server_id)
-
-	fmt.Println("Unassigning the firewall policy from the server's IP...")
-	srv, err := api.UnassignServerIpFirewallPolicy(server_id, ips[0].Id)
-
-	if err != nil {
-		t.Errorf("UnassignServerIpFirewallPolicy failed. Error: " + err.Error())
-		return
-	}
-	if srv.Ips[0].Firewall != nil {
-		t.Errorf("Unassigning the firewall policy failed.")
 	}
 }
 

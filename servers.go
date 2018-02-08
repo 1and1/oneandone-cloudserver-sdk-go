@@ -30,12 +30,12 @@ type Server struct {
 }
 
 type Hardware struct {
-	Vcores            int     `json:"vcore,omitempty"`
-	CoresPerProcessor int     `json:"cores_per_processor"`
-	Ram               float32 `json:"ram"`
-	Hdds              []Hdd   `json:"hdds,omitempty"`
-	FixedInsSizeId    string  `json:"fixed_instance_size_id,omitempty"`
-	BaremetalModelId  interface{}  `json:"baremetal_model_id,omitempty"`
+	Vcores            int         `json:"vcore,omitempty"`
+	CoresPerProcessor int         `json:"cores_per_processor"`
+	Ram               float32     `json:"ram"`
+	Hdds              []Hdd       `json:"hdds,omitempty"`
+	FixedInsSizeId    string      `json:"fixed_instance_size_id,omitempty"`
+	BaremetalModelId  interface{} `json:"baremetal_model_id,omitempty"`
 	ApiPtr
 }
 
@@ -119,10 +119,10 @@ type ServerRequest struct {
 }
 
 type ServerAction struct {
-	Action          string `json:"action,omitempty"`
-	Method          string `json:"method,omitempty"`
-	RecoveryMode    bool   `json:"recovery_mode,omitempty"`
-	RecoveryImageId string `json:"recovery_image_id,omitempty"`
+	Action          string  `json:"action,omitempty"`
+	Method          string  `json:"method,omitempty"`
+	RecoveryMode    *bool   `json:"recovery_mode,omitempty"`
+	RecoveryImageId *string `json:"recovery_image_id,omitempty"`
 }
 
 type FixedInstanceInfo struct {
@@ -143,7 +143,7 @@ type BaremetalHardware struct {
 	CoresPerProcessor int     `json:"cores_per_processor"`
 	Ram               float32 `json:"ram"`
 	Unit              string  `json:"unit,omitempty"`
-	Hdds              Hdd   `json:"hdds,omitempty"`
+	Hdds              Hdd     `json:"hdds,omitempty"`
 	ApiPtr
 }
 
@@ -555,8 +555,9 @@ func (api *API) RecoveryRebootServer(server_id string, is_hardware bool, recover
 		request.Method = "SOFTWARE"
 	}
 
-	request.RecoveryMode = true
-	request.RecoveryImageId = recovery_image_id
+	b := true
+	request.RecoveryMode = &b
+	request.RecoveryImageId = &recovery_image_id
 	url := createUrl(api, serverPathSegment, server_id, "status", "action")
 	err := api.Client.Put(url, &request, &result, http.StatusAccepted)
 	if err != nil {
@@ -749,19 +750,6 @@ func (api *API) AssignServerIpFirewallPolicy(server_id string, ip_id string, fp_
 	result := new(Server)
 	url := createUrl(api, serverPathSegment, server_id, "ips", ip_id, "firewall_policy")
 	err := api.Client.Put(url, &req, &result, http.StatusAccepted)
-	if err != nil {
-		return nil, err
-	}
-	result.api = api
-	result.decodeRaws()
-	return result, nil
-}
-
-// DELETE /servers/{server_id}/ips/{ip_id}/firewall_policy
-func (api *API) UnassignServerIpFirewallPolicy(server_id string, ip_id string) (*Server, error) {
-	result := new(Server)
-	url := createUrl(api, serverPathSegment, server_id, "ips", ip_id, "firewall_policy")
-	err := api.Client.Delete(url, nil, &result, http.StatusAccepted)
 	if err != nil {
 		return nil, err
 	}

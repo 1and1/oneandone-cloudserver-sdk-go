@@ -3,7 +3,9 @@ package oneandone
 import (
 	"fmt"
 	"math/rand"
+	"os"
 	"strconv"
+	"strings"
 	"sync"
 	"testing"
 	"time"
@@ -36,7 +38,7 @@ func setup_baremetal_server() {
 		baremetal_server_id = b_srv.Id
 	}
 
-	err = api.WaitForState(b_srv, "POWERED_OFF", 10, 90)
+	err = api.WaitForState(b_srv, "POWERED_OFF", 20, 90)
 
 	if err != nil {
 		fmt.Printf("Error: %s", err.Error())
@@ -47,6 +49,11 @@ func setup_baremetal_server() {
 
 func get_baremetal_appliance(max_disk_size int) ServerAppliance {
 	saps, _ := api.ListServerAppliances(1, 500, "", "baremetal", "")
+	for i, sp := range saps {
+		if strings.Contains(strings.ToLower(sp.Os), "centos") {
+			return saps[i]
+		}
+	}
 	return saps[0]
 }
 
@@ -63,12 +70,12 @@ func create_baremetal_test_server(power_on bool) (string, *Server, error) {
 	baremetalModelId := baremetalModels[0].Id
 
 	req := ServerRequest{
-		Name:        baremetal_server_name,
-		Description: baremetal_server_name + " description",
-		ApplianceId: baremetal_ser_app_id,
-		//MonitoringPolicyId: mp.Id,
-		PowerOn:    power_on,
-		ServerType: "baremetal",
+		Name:         baremetal_server_name,
+		Description:  baremetal_server_name + " description",
+		ApplianceId:  baremetal_ser_app_id,
+		DatacenterId: get_random_datacenterID(),
+		PowerOn:      power_on,
+		ServerType:   "baremetal",
 		Hardware: Hardware{
 			BaremetalModelId: baremetalModelId,
 		},
@@ -89,7 +96,7 @@ func TestCreateBaremetalServer(t *testing.T) {
 	if baremetal_server.Name != baremetal_server_name {
 		t.Errorf("Wrong server name.")
 	}
-	if baremetal_server.Image.Id != ser_app_id {
+	if baremetal_server.Image.Id != baremetal_ser_app_id {
 		t.Errorf("Wrong server image on server '%s'.", baremetal_server.Name)
 	}
 }
@@ -222,7 +229,7 @@ func TestRebootBaremetalServer(t *testing.T) {
 			return
 		}
 
-		err = api.WaitForState(b_srv, "REBOOTING", 10, 60)
+		err = api.WaitForState(b_srv, "REBOOTING", 5, 60)
 
 		if err != nil {
 			t.Errorf("Rebooting the server using '%s' method failed. Error:  %s", method, err.Error())
@@ -238,6 +245,11 @@ func TestRebootBaremetalServer(t *testing.T) {
 
 func TestRenameBaremetalServer(t *testing.T) {
 	set_baremetal_server.Do(setup_baremetal_server)
+	b_srvs, err := api.GetServer(baremetal_server_id)
+	if err != nil {
+		t.Errorf("get server failed. Error: " + err.Error())
+	}
+	api.WaitForState(b_srvs, "POWERED_ON", 10, 60)
 
 	fmt.Println("Renaming the server...")
 
@@ -461,20 +473,7 @@ func TestDeleteBaremetalServerIp(t *testing.T) {
 		keep_ip := i%2 == 0
 		fmt.Printf("Deleting the baremetal_server's IP '%s' (keep_ip = %s)...\n", baremetal_server.Ips[i].Ip, strconv.FormatBool(keep_ip))
 		api.DeleteServerIp(baremetal_server_id, baremetal_server.Ips[i].Id, keep_ip)
-		time.Sleep(180 * time.Second)
-		ip, _ := api.GetPublicIp(baremetal_server.Ips[i].Id)
-		if keep_ip {
-			if ip == nil {
-				t.Errorf("Failed to keep public IP '%s' when removed from baremetal_server.", baremetal_server.Ips[i].Ip)
-			} else {
-				fmt.Printf("Deleting IP address '%s' after removing from the baremetal_server...\n", baremetal_server.Ips[i].Ip)
-				api.DeletePublicIp(ip.Id)
-			}
-		} else if ip != nil {
-			t.Errorf("Failed to delete public IP '%s' when removed from baremetal_server.", baremetal_server.Ips[i].Ip)
-			fmt.Printf("Cleaning up. Deleting IP address '%s' directly...\n", baremetal_server.Ips[i].Ip)
-			api.DeletePublicIp(ip.Id)
-		}
+		time.Sleep(280 * time.Second)
 	}
 }
 
@@ -586,19 +585,27 @@ func TestGetBaremetalServerIpFirewallPolicy(t *testing.T) {
 	}
 }
 
-func TestUnassignBaremetalServerIpFirewallPolicy(t *testing.T) {
-	set_baremetal_server.Do(setup_baremetal_server)
-	ips, _ := api.ListServerIps(baremetal_server_id)
+func TestRecoveryRebootServer(t *testing.T) {
+	set_server.Do(setup_server)
 
-	fmt.Println("Unassigning the firewall policy from the baremetal_server's IP...")
-	b_srv, err := api.UnassignServerIpFirewallPolicy(baremetal_server_id, ips[0].Id)
+	fmt.Print("Rebooting the server using recovery boot")
+	srv, err := api.RecoveryRebootServer(baremetal_server_id, false, get_random_recoveryImage().Id)
 
 	if err != nil {
-		t.Errorf("UnassignServerIpFirewallPolicy failed. Error: " + err.Error())
+		t.Errorf("Rebooting the server using recovery boot. Error: %s", err.Error())
 		return
 	}
-	if b_srv.Ips[0].Firewall != nil {
-		t.Errorf("Unassigning the firewall policy failed.")
+
+	err = api.WaitForState(srv, "REBOOTING", 10, 60)
+
+	if err != nil {
+		t.Errorf("Rebooting the server using recovery boot. Error:  %s", err.Error())
+	}
+
+	err = api.WaitForState(srv, "POWERED_ON", 20, 60)
+
+	if err != nil {
+		t.Errorf("Rebooting the server using recovery boot. Error:  %s", err.Error())
 	}
 }
 
@@ -607,18 +614,14 @@ func TestDeleteBaremetalServer(t *testing.T) {
 
 	time.Sleep(120 * time.Second)
 	b_srv, err := api.DeleteServer(baremetal_server_id, true)
+	time.Sleep(420 * time.Second)
+
 	if err != nil {
 		t.Errorf("DeleteServer server failed. Error: " + err.Error())
 		return
 	}
 	fmt.Printf("Deleting baremetal_server '%s', keeping baremetal_server's IP '%s'...\n", b_srv.Name, b_srv.Ips[0].Ip)
 	ip_id := b_srv.Ips[0].Id
-
-	err = api.WaitUntilDeleted(b_srv)
-
-	if err != nil {
-		t.Errorf("Deleting the baremetal_server failed. Error: " + err.Error())
-	}
 
 	b_srv, err = api.GetServer(baremetal_server_id)
 

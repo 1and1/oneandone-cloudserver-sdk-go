@@ -4,25 +4,25 @@ import "net/http"
 
 type RecoveryAppliance struct {
 	Identity
-	Os                   Os      `json:"os,omitempty"`
-	AvailableDatacenters []string    `json:"available_datacenters,omitempty"`
+	Os                   Os       `json:"os,omitempty"`
+	AvailableDatacenters []string `json:"available_datacenters,omitempty"`
 	ApiPtr
 }
 
 type SingleRecoveryAppliance struct {
 	Identity
-	Os                   string      `json:"os,omitempty"`
-	OsFamily                   string      `json:"os_family,omitempty"`
-	OsVersion                   string      `json:"os_version,omitempty"`
-	AvailableDatacenters []string    `json:"available_datacenters,omitempty"`
+	Os                   string   `json:"os,omitempty"`
+	OsFamily             string   `json:"os_family,omitempty"`
+	OsVersion            string   `json:"os_version,omitempty"`
+	AvailableDatacenters []string `json:"available_datacenters,omitempty"`
 	ApiPtr
 }
 
 type Os struct {
 	Architecture int    `json:"architecture,omitempty"`
-	Family string    `json:"family,omitempty"`
-	SubFamily string    `json:"subfamily,omitempty"`
-	Name string    `json:"name,omitempty"`
+	Family       string `json:"family,omitempty"`
+	SubFamily    string `json:"subfamily,omitempty"`
+	Name         string `json:"name,omitempty"`
 }
 
 // GET /recovery_appliances
