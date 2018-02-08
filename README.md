@@ -26,6 +26,7 @@ This guide contains instructions on getting started with the library and automat
   - [Roles](#roles)
   - [Usages](#usages)
   - [Server Appliances](#server-appliances)
+  - [Recovery Images](#recovery-images)
   - [DVD ISO](#dvd-iso)
   - [Ping](#ping)
   - [Pricing](#pricing)
@@ -104,6 +105,14 @@ If any of the parameters `sort`, `query` or `fields` is set to an empty string, 
 
 `fis, err := api.GetFixedInstanceSize(fis_id)`
 
+**List bare metal models:**
+
+`res, err := api.ListBaremetalModels()`
+
+**Retrieve information about a bare metal model:**
+
+`bmm, err := api.GetBaremetalModel(baremetalModelId)`
+
 **Retrieve information about a server's hardware:**
 
 `hardware, err := api.GetServerHardware(server_id)`
@@ -156,7 +165,7 @@ If any of the parameters `sort`, `query` or `fields` is set to an empty string, 
 
 `snapshot, err := api.GetServerSnapshot(server_id)`
 
-**Create a server:**
+**Create a cloud server:**
 
 ```
 req := oneandone.ServerRequest {
@@ -164,6 +173,7 @@ req := oneandone.ServerRequest {
     Description: "Server description.",
     ApplianceId: server_appliance_id,
     PowerOn:     true,
+    ServerType:  "cloud",
     Hardware:    oneandone.Hardware {
       Vcores:            1,
       CoresPerProcessor: 1,
@@ -173,6 +183,24 @@ req := oneandone.ServerRequest {
             Size:   100,
             IsMain: true,
         },
+      },
+    },
+  }
+
+server_id, server, err := api.CreateServer(&req)
+```
+
+**Create a bare metal server:**
+
+```
+req := oneandone.ServerRequest {
+    Name:        "Server Name",
+    Description: "Server description.",
+    ApplianceId: server_appliance_id,
+    PowerOn:     true,
+    ServerType:  "baremetal",
+    Hardware:    oneandone.Hardware {
+      BaremetalModelId: "baremetal_model_id"
       },
     },
   }
@@ -285,6 +313,14 @@ Set `keep_ip` to true for releasing the IP without removing it.
 **Reboot a server:**
 
 `server, err := api.RebootServer(server_id, is_hardware)`
+
+Set `is_hardware` to true for HARDWARE method of rebooting.
+
+Set `is_hardware` to false for SOFTWARE method of rebooting.
+
+**Recovery Reboot a server:**
+
+`server, err := api.RecoveryRebootServer(server_id, is_hardware, recovery_image_id)`
 
 Set `is_hardware` to true for HARDWARE method of rebooting.
 
@@ -1491,6 +1527,31 @@ If any of the parameters `sort`, `query` or `fields` is blank, it is ignored in 
 
 `server_appliance, err := api.GetServerAppliance(appliance_id)`
 
+### Recovery Images
+
+**List all the recovery images that you can use to recovery reboot into:**
+
+`res, err := api.ListRecoveryAppliances()`
+
+Alternatively, use the method with query parameters.
+
+`res, err := api.ListRecoveryAppliances(page, per_page, sort, query, fields)`
+
+To paginate the list of server appliances received in the response use `page` and `per_page` parameters. Set `per_page` to the number of server appliances that will be shown in each page. `page` indicates the current page. When set to an integer value that is less or equal to zero, the parameters are ignored by the framework.
+
+To receive the list of server appliances sorted in expected order pass a server appliance property (e.g. `"os"`) in `sort` parameter. Prefix the sorting attribute with `-` sign for sorting in descending order.
+
+Use `query` parameter to search for a string in the response and return only the server appliance instances that contain it.
+
+To retrieve a collection of server appliances containing only the requested fields pass a list of comma separated properties (e.g. `"id,os,architecture"`) in `fields` parameter.
+
+If any of the parameters `sort`, `query` or `fields` is blank, it is ignored in the request.
+
+**Retrieve information about specific recovery image:**
+
+`ra, err := api.GetRecoveryAppliance(image_id)`
+
+
 
 ### DVD ISO
 
@@ -1695,7 +1756,8 @@ func main() {
 		Name:        "Example Server",
 		Description: "Example server description.",
 		ApplianceId: sa.Id,
-		PowerOn:	 true,
+		PowerOn:     True,
+		ServerType:  "cloud",
 		Hardware:    oneandone.Hardware{
 			Vcores:            1,
 			CoresPerProcessor: 1,
@@ -2143,6 +2205,10 @@ func (api *API) EjectServerDvd(server_id string) (*Server, error)
 ```
 
 ```Go
+func (api *API) GetBaremetalModel(bm_id string) (*BaremetalModel, error)
+```
+
+```Go
 func (api *API) GetCurrentUserPermissions() (*Permissions, error)
 ```
 
@@ -2224,6 +2290,10 @@ func (api *API) GetPrivateNetworkServer(pn_id string, server_id string) (*Identi
 
 ```Go
 func (api *API) GetPublicIp(ip_id string) (*PublicIp, error)
+```
+
+```Go
+func (api *API) GetRecoveryAppliance(ra_id string) (*SingleRecoveryAppliance, error)
 ```
 
 ```Go
@@ -2315,6 +2385,10 @@ func (api *API) GetVPNConfigFile(vpn_id string) (string, error)
 ```
 
 ```Go
+func (api *API) ListBaremetalModels(args ...interface{}) ([]BaremetalModel, error)
+```
+
+```Go
 func (api *API) ListDatacenters(args ...interface{}) ([]Datacenter, error)
 ```
 
@@ -2392,6 +2466,10 @@ func (api *API) ListPrivateNetworks(args ...interface{}) ([]PrivateNetwork, erro
 
 ```Go
 func (api *API) ListPublicIps(args ...interface{}) ([]PublicIp, error)
+```
+
+```Go
+func (api *API) ListRecoveryAppliances(args ...interface{}) ([]RecoveryAppliance, error)
 ```
 
 ```Go
@@ -2492,6 +2570,10 @@ func (api *API) PingAuth() ([]string, error)
 
 ```Go
 func (api *API) RebootServer(server_id string, is_hardware bool) (*Server, error)
+```
+
+```Go
+func (api *API) RecoveryRebootServer(server_id string, is_hardware bool, recovery_image_id string)
 ```
 
 ```Go
