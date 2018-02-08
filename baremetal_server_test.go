@@ -3,7 +3,6 @@ package oneandone
 import (
 	"fmt"
 	"math/rand"
-	"os"
 	"strconv"
 	"strings"
 	"sync"
