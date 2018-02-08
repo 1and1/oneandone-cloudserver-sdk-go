@@ -1,7 +1,6 @@
 package oneandone
 
 import (
-	"encoding/base64"
 	"fmt"
 	"math/rand"
 	"sync"
@@ -25,9 +24,19 @@ func create_vpn() *VPN {
 	rint := rand.Intn(9999)
 	vpn_name = fmt.Sprintf("Test_VPN_%d", rint)
 	vpn_desc = fmt.Sprintf("Test_VPN_%d description", rint)
+	var datacenter Datacenter
+
+	dcs, err := api.ListDatacenters()
+	if len(dcs) > 0 {
+		for _, dc := range dcs {
+			if dc.CountryCode == vpn_dc_code {
+				datacenter = dc
+			}
+		}
+	}
 
 	fmt.Printf("Creating VPN '%s'...\n", vpn_name)
-	vpn_id, vpn, err := api.CreateVPN(vpn_name, vpn_desc, "")
+	vpn_id, vpn, err := api.CreateVPN(vpn_name, vpn_desc, datacenter.Id)
 	if err != nil {
 		fmt.Printf("Unable to create a VPN. Error: %s", err.Error())
 		return nil
@@ -140,21 +149,16 @@ func TestListVPNs(t *testing.T) {
 }
 
 func TestGetVPNConfigFile(t *testing.T) {
-	set_vpn.Do(set_vpn_once)
+	//set_vpn.Do(set_vpn_once)
 
 	fmt.Printf("Getting VPN's configuration...\n")
-	base64_str, err := api.GetVPNConfigFile(test_vpn.Id)
+	_, err := api.GetVPNConfigFile("C:\\"+test_vpn.Name, "6EDFEFFDB31745780E4D132C7E6ABFF1")
 
 	if err != nil {
 		t.Errorf("GetVPNConfigFile failed. Error: " + err.Error())
 		return
 	}
 
-	_, err = base64.StdEncoding.DecodeString(base64_str)
-
-	if err != nil {
-		t.Errorf("Unable to decode config file string. Error: " + err.Error())
-	}
 }
 
 func TestModifyVPN(t *testing.T) {
