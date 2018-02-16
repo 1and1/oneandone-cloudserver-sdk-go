@@ -44,6 +44,8 @@ func (c *restClient) Put(url string, requestBody interface{}, result interface{}
 }
 
 func (c *restClient) doRequest(url string, method string, requestBody interface{}, result interface{}, expectedStatus int) error {
+	maxRetries := 5
+	retriesCount := 0
 	var bodyData io.Reader
 	if requestBody != nil {
 		data, err := json.Marshal(requestBody)
@@ -73,8 +75,11 @@ func (c *restClient) doRequest(url string, method string, requestBody interface{
 			_, ok := err.(*p_url.Error)
 			if ok {
 				//EOF error happened doing a retry
-				time.Sleep(3 * time.Second)
-				continue
+				if retriesCount < maxRetries {
+					retriesCount++
+					time.Sleep(3 * time.Second)
+					continue
+				}
 			}
 			return err
 		}
