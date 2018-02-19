@@ -74,7 +74,7 @@ func (c *restClient) doRequest(url string, method string, requestBody interface{
 		if err != nil {
 			_, ok := err.(*p_url.Error)
 			if ok {
-				//EOF error happened doing a retry
+				//EOF error, sending a retry
 				if retriesCount < maxRetries {
 					retriesCount++
 					time.Sleep(3 * time.Second)
