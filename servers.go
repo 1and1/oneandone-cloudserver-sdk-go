@@ -116,6 +116,8 @@ type ServerRequest struct {
 	MonitoringPolicyId string   `json:"monitoring_policy_id,omitempty"`
 	DatacenterId       string   `json:"datacenter_id,omitempty"`
 	SSHKey             string   `json:"rsa_key,omitempty"`
+	SSHPassword        *bool    `json:"ssh_password,omitempty"`
+	PublicKey          []string `json:"public_key,omitempty"`
 }
 
 type ServerAction struct {
@@ -169,39 +171,7 @@ func (api *API) ListServers(args ...interface{}) ([]Server, error) {
 func (api *API) CreateServer(request *ServerRequest) (string, *Server, error) {
 	result := new(Server)
 	url := createUrl(api, serverPathSegment)
-	insert2map := func(hasht map[string]interface{}, key string, value string) {
-		if key != "" && value != "" {
-			hasht[key] = value
-		}
-	}
-	req := make(map[string]interface{})
-	hw := make(map[string]interface{})
-	req["name"] = request.Name
-	req["description"] = request.Description
-	req["appliance_id"] = request.ApplianceId
-	req["power_on"] = request.PowerOn
-	insert2map(req, "password", request.Password)
-	insert2map(req, "firewall_policy_id", request.FirewallPolicyId)
-	insert2map(req, "ip_id", request.IpId)
-	insert2map(req, "load_balancer_id", request.LoadBalancerId)
-	insert2map(req, "monitoring_policy_id", request.MonitoringPolicyId)
-	insert2map(req, "datacenter_id", request.DatacenterId)
-	insert2map(req, "rsa_key", request.SSHKey)
-	insert2map(req, "server_type", request.ServerType)
-	insert2map(req, "hostname", request.Hostname)
-	req["hardware"] = hw
-
-	if request.ServerType == "baremetal" {
-		hw["baremetal_model_id"] = request.Hardware.BaremetalModelId
-	} else if request.Hardware.FixedInsSizeId != "" {
-		hw["fixed_instance_size_id"] = request.Hardware.FixedInsSizeId
-	} else {
-		hw["vcore"] = request.Hardware.Vcores
-		hw["cores_per_processor"] = request.Hardware.CoresPerProcessor
-		hw["ram"] = request.Hardware.Ram
-		hw["hdds"] = request.Hardware.Hdds
-	}
-	err := api.Client.Post(url, &req, &result, http.StatusAccepted)
+	err := api.Client.Post(url, &request, &result, http.StatusAccepted)
 	if err != nil {
 		return "", nil, err
 	}
