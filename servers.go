@@ -46,7 +46,7 @@ type ServerHdds struct {
 type Hdd struct {
 	idField
 	Size   int    `json:"size,omitempty"`
-	IsMain bool   `json:"is_main,omitempty"`
+	IsMain bool   `json:"is_main"`
 	Unit   string `json:"unit,omitempty"`
 	ApiPtr
 }
@@ -118,6 +118,7 @@ type ServerRequest struct {
 	SSHKey             string   `json:"rsa_key,omitempty"`
 	SSHPassword        *bool    `json:"ssh_password,omitempty"`
 	PublicKey          []string `json:"public_key,omitempty"`
+	PrivateNetworkId   string   `json:"private_network_id,omitempty"`
 }
 
 type ServerAction struct {
