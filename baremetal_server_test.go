@@ -23,8 +23,6 @@ var (
 func setup_baremetal_server() {
 	fmt.Println("Deploying a baremetal test server...")
 	b_srv_id, b_srv, err := create_baremetal_test_server(false)
-	//b_srv, err := api.GetServer("86884513A78F2F2223E393BE1CA1135A")
-	//b_srv_id := b_srv.Id
 
 	if err != nil {
 		fmt.Printf("Unable to create the baremetal server. Error: %s", err.Error())
