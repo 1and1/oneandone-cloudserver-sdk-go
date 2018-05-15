@@ -176,7 +176,13 @@ func TestUpdateImage(t *testing.T) {
 	new_name := test_image.Name + " updated"
 	new_desc := test_image.Name + " updated"
 
-	img, err := api.UpdateImage(test_image.Id, new_name, new_desc, "ONCE")
+	imageUpdated := UpdateImageRequest{
+		Name:        new_name,
+		Description: new_desc,
+		Frequency:   "ONCE",
+	}
+
+	img, err := api.UpdateImage(test_image.Id, &imageUpdated)
 
 	if err != nil {
 		t.Errorf("UpdateImage failed. Error: " + err.Error())
