@@ -118,7 +118,7 @@ func TestDeleteSSHKey(t *testing.T) {
 	set_ssh_key.Do(setup_ssh_key)
 	_, err := api.DeleteSSHKey(test_ssh_key.Id)
 	if err != nil {
-		t.Errorf("Error while deleting ssh key", err.Error())
+		t.Errorf(err.Error())
 		t.Fail()
 	}
 

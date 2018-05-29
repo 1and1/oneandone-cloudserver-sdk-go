@@ -148,7 +148,7 @@ func TestGetBlockStorage(t *testing.T) {
 func TestAddBlockStorageServer(t *testing.T) {
 	set_bs.Do(set_block_storage)
 	set_bs_server.Do(setup_bs_server)
-	fmt.Printf("Adding server to block storage '%s'...\n", test_bs.Name)
+	fmt.Printf("Adding block storage '%s' to server ...\n", test_bs.Name)
 
 	bs, err := api.AddBlockStorageServer(test_bs.Id, test_bs_server.Id)
 
@@ -161,7 +161,7 @@ func TestAddBlockStorageServer(t *testing.T) {
 	bs, _ = api.GetBlockStorage(bs.Id)
 
 	if bs.Server == nil {
-		t.Errorf("Found no server added to the shared storage.")
+		t.Errorf("Found no server to which the block storage is added to.")
 	}
 
 	bs, err = api.RemoveBlockStorageServer(bs.Id, test_bs_server.Id)
@@ -171,7 +171,7 @@ func TestAddBlockStorageServer(t *testing.T) {
 	}
 
 	if bs.Server != nil {
-		t.Errorf("Server not removed from the shared storage.")
+		t.Errorf("Server not removed from the block storage.")
 	}
 	api.WaitForState(bs, "POWERED_ON", 10, 30)
 
@@ -183,7 +183,7 @@ func TestDeleteBlockStorage(t *testing.T) {
 
 	bs, err := api.DeleteBlockStorage(test_bs.Id)
 	if err != nil {
-		t.Errorf("DeleteSharedStorage failed. Error: " + err.Error())
+		t.Errorf("DeleteBlockStorage failed. Error: " + err.Error())
 		return
 	} else {
 		api.WaitUntilDeleted(bs)
@@ -198,10 +198,40 @@ func TestDeleteBlockStorage(t *testing.T) {
 	}
 
 	if test_bs_server != nil {
+		api.WaitForState(test_bs_server, "POWERED_ON", 10, 90)
 		_, err := api.DeleteServer(test_bs_server.Id, false)
 		if err != nil {
 			t.Errorf("DeleteServer failed. Error: " + err.Error())
 			return
 		}
+	}
+}
+
+func TestUpdateBlockStorage(t *testing.T) {
+	set_bs.Do(set_block_storage)
+	if test_bs == nil {
+		test_bs = create_block_storage()
+	}
+
+	fmt.Printf("Updating block storage '%s'...\n", test_bs.Name)
+	new_name := fmt.Sprintf("updated_%s", test_bs.Name)
+	new_desc := fmt.Sprintf("updated_%s", test_bs.Description)
+	bsu := UpdateBlockStorageRequest{
+		Name:        new_name,
+		Description: new_desc,
+	}
+	blk_storage, err := api.UpdateBlockStorage(test_bs.Id, &bsu)
+
+	if err != nil {
+		t.Errorf("UpdateBlockStorage failed. Error: " + err.Error())
+	} else {
+		api.WaitForState(blk_storage, "POWERED_ON", 10, 30)
+	}
+	blk_storage, _ = api.GetBlockStorage(blk_storage.Id)
+	if blk_storage.Name != new_name {
+		t.Errorf("Failed to update block storage name.")
+	}
+	if blk_storage.Description != new_desc {
+		t.Errorf("Failed to update block storage description.")
 	}
 }
