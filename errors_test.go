@@ -5,7 +5,7 @@ import (
 )
 
 func TestCreateError(t *testing.T) {
-	err := apiError{httpStatusCode: 404, message: "Not found"}
+	err := ApiError{httpStatusCode: 404, message: "Not found"}
 
 	if err.HttpStatusCode() != 404 {
 		t.Errorf("Wrong HTTP status code.")
