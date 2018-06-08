@@ -55,12 +55,11 @@ func (c *restClient) doRequest(url string, method string, requestBody interface{
 		bodyData = bytes.NewBuffer(data)
 	}
 
-	request, err := http.NewRequest(method, url, bodyData)
-	if err != nil {
-		return err
-	}
-
 	for {
+		request, err := http.NewRequest(method, url, bodyData)
+		if err != nil {
+			return err
+		}
 		request.Header.Add("X-Token", c.token)
 		request.Header.Add("Content-Type", "application/json")
 
