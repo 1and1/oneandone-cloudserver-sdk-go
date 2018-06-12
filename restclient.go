@@ -110,7 +110,7 @@ func (c *restClient) doRequest(url string, method string, requestBody interface{
 				if err != nil {
 					return err
 				}
-				return apiError{response.StatusCode, fmt.Sprintf("Type: %s; Message: %s", erResp.Type, erResp.Message)}
+				return ApiError{response.StatusCode, fmt.Sprintf("Type: %s; Message: %s", erResp.Type, erResp.Message)}
 			} else {
 				return c.unmarshal(body, result)
 			}
