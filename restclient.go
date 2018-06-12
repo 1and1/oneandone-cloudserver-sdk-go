@@ -46,16 +46,17 @@ func (c *restClient) Put(url string, requestBody interface{}, result interface{}
 func (c *restClient) doRequest(url string, method string, requestBody interface{}, result interface{}, expectedStatus int) error {
 	maxRetries := 5
 	retriesCount := 0
-	var bodyData io.Reader
-	if requestBody != nil {
-		data, err := json.Marshal(requestBody)
-		if err != nil {
-			return err
-		}
-		bodyData = bytes.NewBuffer(data)
-	}
 
 	for {
+
+		var bodyData io.Reader
+		if requestBody != nil {
+			data, err := json.Marshal(requestBody)
+			if err != nil {
+				return err
+			}
+			bodyData = bytes.NewBuffer(data)
+		}
 		request, err := http.NewRequest(method, url, bodyData)
 		if err != nil {
 			return err
