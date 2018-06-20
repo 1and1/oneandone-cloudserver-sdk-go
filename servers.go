@@ -151,7 +151,7 @@ type BaremetalHardware struct {
 	CoresPerProcessor int     `json:"cores_per_processor"`
 	Ram               float32 `json:"ram"`
 	Unit              string  `json:"unit,omitempty"`
-	Hdds              Hdd     `json:"hdds,omitempty"`
+	Hdds              []Hdd   `json:"hdds,omitempty"`
 	ApiPtr
 }
 
