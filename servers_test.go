@@ -301,40 +301,8 @@ func TestListBaremetalModel(t *testing.T) {
 
 	baremetalModelId = res[0].Id
 
-	res, err = api.ListBaremetalModels(1, 2, "name", "", "id,name")
-
-	if err != nil {
-		t.Errorf("ListBaremetalModels with parameter options failed. Error: " + err.Error())
-		return
-	}
 	if len(res) == 0 {
 		t.Errorf("No baremetal model found.")
-	}
-	if len(res) > 2 {
-		t.Errorf("Wrong number of objects per page.")
-	}
-	if res[0].Hardware != nil {
-		t.Errorf("Filtering parameters failed.")
-	}
-	if res[0].Name == "" {
-		t.Errorf("Filtering parameters failed.")
-	}
-
-	// Test for error response
-	res, err = api.ListBaremetalModels(0, 0, true, "name", "")
-	if res != nil || err == nil {
-		t.Errorf("ListBaremetalModels failed to handle incorrect argument type.")
-	}
-
-	res, err = api.ListBaremetalModels(0, 0, "", "BMC", "")
-
-	if err != nil {
-		t.Errorf("ListBaremetalModels with parameter options failed. Error: " + err.Error())
-		return
-	}
-
-	if !strings.Contains(res[0].Name, "BMC") {
-		t.Errorf("Search parameter failed.")
 	}
 }
 
