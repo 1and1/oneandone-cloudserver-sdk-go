@@ -62,7 +62,7 @@ func create_baremetal_test_server(power_on bool) (string, *Server, error) {
 	sap := get_baremetal_appliance(hdd_size)
 	baremetal_ser_app_id = sap.Id
 	//mp := get_default_mon_policy()
-	baremetalModels, err := api.ListBaremetalModels(1, 1, "", "BMC_L", "")
+	baremetalModels, err := api.ListBaremetalModels()
 	baremetalModel = baremetalModels[0]
 	baremetalModelId := baremetalModels[0].Id
 

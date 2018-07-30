@@ -43,6 +43,11 @@ type ServerHdds struct {
 	Hdds []Hdd `json:"hdds,omitempty"`
 }
 
+type ServerPrivateNetwork struct {
+	Identity
+	ServerPrivateIp string `json:"server_ip,omitempty"`
+}
+
 type Hdd struct {
 	idField
 	Size   int    `json:"size,omitempty"`
@@ -151,7 +156,7 @@ type BaremetalHardware struct {
 	CoresPerProcessor int     `json:"cores_per_processor"`
 	Ram               float32 `json:"ram"`
 	Unit              string  `json:"unit,omitempty"`
-	Hdds              []Hdd   `json:"hdds,omitempty"`
+	Hdds              []Hdd     `json:"hdds,omitempty"`
 	ApiPtr
 }
 
@@ -822,13 +827,10 @@ func (api *API) CloneServer(server_id string, new_name string, datacenter_id str
 }
 
 // GET /servers/baremetal_models
-func (api *API) ListBaremetalModels(args ...interface{}) ([]BaremetalModel, error) {
-	url, err := processQueryParams(createUrl(api, serverPathSegment, baremetalSegment), args...)
-	if err != nil {
-		return nil, err
-	}
+func (api *API) ListBaremetalModels() ([]BaremetalModel, error) {
+	url := createUrl(api, serverPathSegment, baremetalSegment)
 	res := []BaremetalModel{}
-	err = api.Client.Get(url, &res, http.StatusOK)
+	err := api.Client.Get(url, &res, http.StatusOK)
 	if err != nil {
 		return nil, err
 	}
