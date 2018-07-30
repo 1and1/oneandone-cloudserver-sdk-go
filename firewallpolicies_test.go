@@ -28,8 +28,9 @@ func create_firewall_policy() *FirewallPolicy {
 		Rules: []FirewallPolicyRule{
 			{
 				Protocol: "UDP",
-				PortFrom: Int2Pointer(161),
-				PortTo:   Int2Pointer(162),
+				Port:"161",
+				Action: "allow",
+				Description:"test rules",
 			},
 		},
 	}
@@ -264,14 +265,14 @@ func TestAddFirewallPolicyRules(t *testing.T) {
 	rules := []FirewallPolicyRule{
 		{
 			Protocol: "TCP",
-			PortFrom: Int2Pointer(4567),
-			PortTo:   Int2Pointer(4567),
+			Port:"4567",
+			Action:"allow",
 			SourceIp: "0.0.0.0",
 		},
 		{
 			Protocol: "TCP/UDP",
-			PortFrom: Int2Pointer(143),
-			PortTo:   Int2Pointer(143),
+			Port:"143",
+			Action:"allow",
 		},
 		{
 			Protocol: "GRE", // PortFrom & PortTo are optional for GRE, ICMP and IPSEC protocols.
