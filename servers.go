@@ -43,11 +43,6 @@ type ServerHdds struct {
 	Hdds []Hdd `json:"hdds,omitempty"`
 }
 
-type ServerPrivateNetwork struct {
-	Identity
-	ServerPrivateIp string `json:"server_ip,omitempty"`
-}
-
 type Hdd struct {
 	idField
 	Size   int    `json:"size,omitempty"`
