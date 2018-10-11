@@ -710,6 +710,7 @@ loadbalancer_id, loadbalancer, err := api.CreateLoadBalancer(&request)
 Optional parameters are `HealthCheckPath`, `HealthCheckPathParser`, `Source` and `Description`. Load balancer `Method` must be set to `"ROUND_ROBIN"` or `"LEAST_CONNECTIONS"`.
 
 **Update a load balancer:**
+
 ```
 request := oneandone.LoadBalancerRequest {
     Name: new_name,
