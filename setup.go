@@ -1,7 +1,7 @@
 package oneandone
 
 // The base url for 1&1 Cloud Server REST API.
-var BaseUrl = "https://cloudpanel-api.1and1.com/v1"
+var BaseUrl = "https://cloudpanel-api.ionos.com/v1"
 
 // Authentication token
 var Token string
